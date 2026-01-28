@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+﻿import { useEffect, useRef, useState, useCallback } from 'react';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Components
 import Header from './components/Header';
+import AnimatedBackground from './components/AnimatedBackground';
 import HabitCard from './components/HabitCard';
 import ProgressRing from './components/ProgressRing';
 import ProgressBar from './components/ProgressBar';
@@ -100,17 +101,11 @@ function AppContent() {
       ref={appRef}
       className="min-h-screen bg-dark-900 text-white"
     >
-      {/* Background gradient effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent-primary/5 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-[100px]" />
-      </div>
-
-      {/* Main container */}
+      {/* Animated Background */}`n      <AnimatedBackground />`n`n      {/* Main container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         
         {/* Header */}
-        <Header />
+        <Header userName={user?.displayName || user?.email?.split('@')[0]} />
 
         {/* User info bar */}
         <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-dark-800/50">
@@ -220,11 +215,11 @@ function AppContent() {
                 <div className="mt-4 text-center">
                   {completionPercentage === 100 ? (
                     <p className="text-accent-primary font-medium">
-                      🎉 Perfect day! All habits complete!
+                      ðŸŽ‰ Perfect day! All habits complete!
                     </p>
                   ) : completionPercentage >= 75 ? (
                     <p className="text-white/60">
-                      Almost there! Keep going! 💪
+                      Almost there! Keep going! ðŸ’ª
                     </p>
                   ) : completionPercentage >= 50 ? (
                     <p className="text-white/60">
@@ -232,7 +227,7 @@ function AppContent() {
                     </p>
                   ) : (
                     <p className="text-white/60">
-                      Let's build those habits! 🚀
+                      Let's build those habits! ðŸš€
                     </p>
                   )}
                 </div>
@@ -257,7 +252,7 @@ function AppContent() {
                           }
                         `}
                       >
-                        {habits[habit.id] ? '✓' : '○'}
+                        {habits[habit.id] ? 'âœ“' : 'â—‹'}
                       </span>
                     </div>
                   ))}
@@ -267,7 +262,7 @@ function AppContent() {
               {/* Motivational card */}
               <div className="card p-5 bg-gradient-to-br from-accent-primary/10 to-cyan-500/10 border-accent-primary/20">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">🎯</span>
+                  <span className="text-2xl">ðŸŽ¯</span>
                   <h3 className="font-semibold text-white/80">Stay Focused</h3>
                 </div>
                 <p className="text-sm text-white/50 leading-relaxed">
@@ -333,7 +328,7 @@ function AppContent() {
         {/* Footer */}
         <footer className="mt-12 pt-6 border-t border-white/5 text-center">
           <p className="text-sm text-white/30">
-            Built with discipline • Track your habits • Transform your life
+            Built with discipline â€¢ Track your habits â€¢ Transform your life
           </p>
           <p className="text-xs text-white/20 mt-2">
             Data stored locally on your device
@@ -361,3 +356,4 @@ function App() {
 }
 
 export default App;
+
