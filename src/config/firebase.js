@@ -2,14 +2,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Your Firebase config - REPLACE THESE with your values from Firebase Console
 const firebaseConfig = {
-  apiKey: "AIzaSyD_REPLACE_WITH_YOUR_KEY",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123"
+  apiKey: "AIzaSyDWbMoa28gSihxH5RxhiK_1fIEcbpcFeRk",
+  authDomain: "habit-tracker-d1353.firebaseapp.com",
+  projectId: "habit-tracker-d1353",
+  storageBucket: "habit-tracker-d1353.firebasestorage.app",
+  messagingSenderId: "945465791852",
+  appId: "1:945465791852:web:ccf1499b0eea75848c0f49"
 };
 
 const app = initializeApp(firebaseConfig);
