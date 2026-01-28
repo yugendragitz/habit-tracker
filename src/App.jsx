@@ -60,32 +60,11 @@ function AppContent() {
     }
   }, [isLoaded, gsap, DURATION, EASING]);
 
-  // Tab change with page transition
+  // Tab change - simple state change, CSS handles animations
   const handleTabChange = useCallback((newTab) => {
     if (newTab === activeTab) return;
-    
-    // Animate out current content, then switch
-    if (tabContentRef.current) {
-      gsap.to(tabContentRef.current, {
-        opacity: 0,
-        y: 10,
-        duration: DURATION.fast,
-        ease: EASING.smooth,
-        onComplete: () => {
-          setActiveTab(newTab);
-          transitionToScreen(newTab);
-          // Animate in new content
-          gsap.fromTo(tabContentRef.current,
-            { opacity: 0, y: -10 },
-            { opacity: 1, y: 0, duration: DURATION.normal, ease: EASING.smooth }
-          );
-        }
-      });
-    } else {
-      setActiveTab(newTab);
-      transitionToScreen(newTab);
-    }
-  }, [activeTab, gsap, DURATION, EASING, transitionToScreen]);
+    setActiveTab(newTab);
+  }, [activeTab]);
 
   // Show auth loading
   if (authLoading) {

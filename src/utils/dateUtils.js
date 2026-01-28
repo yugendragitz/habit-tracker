@@ -141,3 +141,9 @@ export const getLastNDays = (n) => {
   }
   return dates;
 };
+
+// Get short day name from day index (0=Sun, 1=Mon, etc.)
+export const getShortDayName = (dayIndex) => {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return days[dayIndex];
+};
