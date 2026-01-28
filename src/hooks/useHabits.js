@@ -1,27 +1,39 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getToday } from '../utils/dateUtils';
 import { getHabitsForDate, saveHabitsForDate } from '../utils/storageUtils';
+import { saveHabitsToCloud, loadHabitsFromCloud } from '../utils/cloudStorage';
 import { HABITS } from '../utils/habits';
 
 /**
  * Custom hook for managing daily habit state
- * Handles loading, saving, and auto-reset on date change
+ * Syncs to cloud when user is authenticated
  */
-export const useHabits = () => {
+export const useHabits = (userId = null) => {
   const [currentDate, setCurrentDate] = useState(getToday());
   const [habits, setHabits] = useState({});
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load habits for current date
   useEffect(() => {
-    const loadHabits = () => {
+    const loadHabits = async () => {
       const today = getToday();
       
       if (today !== currentDate) {
         setCurrentDate(today);
       }
       
-      const savedHabits = getHabitsForDate(today);
+      let savedHabits = {};
+      
+      // Try cloud first if logged in
+      if (userId) {
+        const cloudHabits = await loadHabitsFromCloud(userId, today);
+        if (cloudHabits) savedHabits = cloudHabits;
+      }
+      
+      // Fallback to localStorage
+      if (Object.keys(savedHabits).length === 0) {
+        savedHabits = getHabitsForDate(today);
+      }
       
       const initializedHabits = {};
       HABITS.forEach(habit => {
@@ -43,25 +55,26 @@ export const useHabits = () => {
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [currentDate]);
+  }, [currentDate, userId]);
 
-  // Toggle a habit's completion status
+  // Toggle habit
   const toggleHabit = useCallback((habitId) => {
     setHabits(prev => {
       const newHabits = { ...prev, [habitId]: !prev[habitId] };
       saveHabitsForDate(currentDate, newHabits);
+      if (userId) saveHabitsToCloud(userId, currentDate, newHabits);
       return newHabits;
     });
-  }, [currentDate]);
+  }, [currentDate, userId]);
 
-  // Set a specific habit's status
   const setHabitStatus = useCallback((habitId, status) => {
     setHabits(prev => {
       const newHabits = { ...prev, [habitId]: status };
       saveHabitsForDate(currentDate, newHabits);
+      if (userId) saveHabitsToCloud(userId, currentDate, newHabits);
       return newHabits;
     });
-  }, [currentDate]);
+  }, [currentDate, userId]);
 
   const completedCount = Object.values(habits).filter(Boolean).length;
   const totalCount = HABITS.length;

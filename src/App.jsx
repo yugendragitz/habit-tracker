@@ -34,7 +34,7 @@ function AppContent() {
   const tabContentRef = useRef(null);
   const hasInitialAnimatedRef = useRef(false);
   
-  // Habit management hook
+  // Habit management hook - pass userId for cloud sync
   const {
     currentDate,
     habits,
@@ -44,7 +44,7 @@ function AppContent() {
     totalCount,
     completionPercentage,
     habitList,
-  } = useHabits();
+  } = useHabits(user?.uid);
 
   const currentYear = getCurrentYear();
   const currentMonth = getCurrentMonth();

@@ -115,7 +115,7 @@ const AuthScreen = memo(() => {
                   placeholder="••••••••"
                   className="w-full px-4 py-3 rounded-xl bg-dark-700 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-accent-primary/50 transition-all"
                   required
-                  minLength={4}
+                  minLength={6}
                 />
               </div>
 
