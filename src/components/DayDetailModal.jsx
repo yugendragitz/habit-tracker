@@ -1,6 +1,7 @@
 import { getHeatmapLevel, HEATMAP_COLORS } from '../utils/analyticsUtils';
+import { calculateDailyNutrition } from '../utils/nutritionUtils';
 
-export default function DayDetailModal({ dateStr, dailyRecord, habitsList, isOpen, onClose, onToggleHabit }) {
+export default function DayDetailModal({ dateStr, dailyRecord, workoutsMap, foodEntriesMap, waterLogsMap, bodyMeasurementsMap, habitsList, isOpen, onClose, onToggleHabit }) {
   if (!isOpen || !dateStr) return null;
 
   const dateObj = new Date(dateStr);
@@ -14,7 +15,6 @@ export default function DayDetailModal({ dateStr, dailyRecord, habitsList, isOpe
   const habitsMap = dailyRecord?.habits || {};
   const activeHabits = (habitsList || []).filter(h => h.active !== false);
   const completedList = activeHabits.filter(h => habitsMap[h.id]);
-  const incompleteList = activeHabits.filter(h => !habitsMap[h.id]);
   
   const score = dailyRecord?.score !== undefined 
     ? dailyRecord.score 
@@ -22,14 +22,20 @@ export default function DayDetailModal({ dateStr, dailyRecord, habitsList, isOpe
 
   const level = getHeatmapLevel(score);
 
+  const workouts = workoutsMap?.[dateStr] || [];
+  const foods = foodEntriesMap?.[dateStr] || [];
+  const water = waterLogsMap?.[dateStr] || 0;
+  const measurement = bodyMeasurementsMap?.[dateStr] || {};
+  const nutrition = calculateDailyNutrition(foods);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="card max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border-white/10 shadow-2xl">
+      <div className="card max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden border-white/10 shadow-2xl">
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-white/10">
           <div>
-            <span className="text-xs text-white/50 uppercase tracking-widest font-semibold">Date Inspector</span>
+            <span className="text-xs text-white/50 uppercase tracking-widest font-semibold">Date Summary Inspector</span>
             <h2 className="text-lg font-bold text-white mt-0.5">{formattedDate}</h2>
           </div>
           <button 
@@ -60,6 +66,45 @@ export default function DayDetailModal({ dateStr, dailyRecord, habitsList, isOpe
               {score >= 75 ? '🔥 Excellent' : score >= 50 ? '⚡ Good' : score > 0 ? '🌱 Average' : '○ No Activity'}
             </div>
           </div>
+
+          {/* Quick Metrics Badges for Phase 2 */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[10px] text-white/40 font-bold block">Workout</span>
+              <strong className="text-accent-primary">{workouts.length > 0 ? `✓ ${workouts.length} Logged` : 'None'}</strong>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[10px] text-white/40 font-bold block">Calories</span>
+              <strong className="text-white">{nutrition.totalCalories} kcal</strong>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[10px] text-white/40 font-bold block">Protein</span>
+              <strong className="text-emerald-400">{nutrition.totalProtein}g</strong>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[10px] text-white/40 font-bold block">Water</span>
+              <strong className="text-cyan-400">{water} L</strong>
+            </div>
+          </div>
+
+          {/* Workout Section if recorded */}
+          {workouts.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-accent-primary uppercase tracking-wider">🏋️ Workout Recorded</h4>
+              {workouts.map(w => (
+                <div key={w.id} className="p-3 rounded-xl bg-dark-900/60 border border-white/5 text-xs flex justify-between">
+                  <div>
+                    <strong className="text-white block">{w.title}</strong>
+                    <span className="text-white/40">{w.exercises?.length || 0} exercises • {w.durationMinutes} min</span>
+                  </div>
+                  <span className="font-bold text-accent-primary">{(w.totalVolume || 0).toLocaleString()} kg vol</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Habits breakdown */}
           <div className="space-y-3">
@@ -99,7 +144,7 @@ export default function DayDetailModal({ dateStr, dailyRecord, habitsList, isOpe
             </div>
           </div>
 
-          {/* Morning Focus & Evening Reflection if recorded */}
+          {/* Reflections */}
           {(dailyRecord?.morningFocus || dailyRecord?.eveningReflection?.note) && (
             <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-3">
               {dailyRecord.morningFocus && (

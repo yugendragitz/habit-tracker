@@ -1,13 +1,17 @@
 /**
- * storageUtils.js - LocalStorage Persistence & Migration Engine for MOMENTUM
+ * storageUtils.js - LocalStorage Persistence & Migration Engine for MOMENTUM Phase 2
  */
 import { DEFAULT_HABITS } from './habits';
-import { calculateDailyScore } from './analyticsUtils';
+import { DEFAULT_EXERCISES } from './exerciseDatabase';
+import { DEFAULT_NUTRITION_TARGETS } from './nutritionUtils';
+import { calculateHabitScore } from './analyticsUtils';
+import { detectPersonalRecords } from './fitnessUtils';
 
-const STORAGE_KEY = 'momentum_data';
-const LEGACY_STORAGE_KEY = 'habitTracker';
+const STORAGE_KEY = 'momentum_data_v2';
+const LEGACY_STORAGE_KEY_V1 = 'momentum_data';
+const LEGACY_STORAGE_KEY_ORIGINAL = 'habitTracker';
 
-// Default empty schema for MOMENTUM
+// Default initial schema for MOMENTUM Phase 2
 const createInitialData = () => ({
   habits: DEFAULT_HABITS,
   dailyRecords: {},
@@ -16,52 +20,77 @@ const createInitialData = () => ({
       id: 'goal-gym-consistency',
       title: 'Build Consistent Workout Routine',
       category: 'Fitness',
-      targetDays: 20,
-      linkedHabitId: 'gym',
+      targetValue: 20,
+      currentValue: 0,
+      unit: 'days',
+      linkedHabitIds: ['gym'],
       completed: false,
       createdAt: new Date().toISOString(),
     },
     {
-      id: 'goal-study-mastery',
-      title: 'Master Skill & Daily Study',
-      category: 'Productivity',
-      targetDays: 25,
-      linkedHabitId: 'study',
+      id: 'goal-weight-target',
+      title: 'Reach Target Body Weight',
+      category: 'Fitness',
+      targetValue: 65,
+      currentValue: 54,
+      unit: 'kg',
+      linkedHabitIds: ['gym', 'clean-food'],
       completed: false,
       createdAt: new Date().toISOString(),
     }
   ],
-  // Future Phase 2 / Phase 3 placeholders
-  workoutLogs: {},
-  nutritionLogs: {},
-  aiCoachData: {},
+  nutritionTargets: DEFAULT_NUTRITION_TARGETS,
+  weightGoal: {
+    currentWeightKg: 54,
+    targetWeightKg: 65,
+    targetDate: '2026-12-31',
+  },
+  exerciseDatabase: DEFAULT_EXERCISES,
+  workouts: {},
+  foodEntries: {},
+  waterLogs: {},
+  bodyMeasurements: {},
+  personalRecords: {},
 });
 
-// Load all MOMENTUM data from LocalStorage with automatic legacy migration
+// Load all MOMENTUM data with automatic multi-version migration
 export const getMomentumData = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (!parsed.habits || parsed.habits.length === 0) {
-        parsed.habits = DEFAULT_HABITS;
-      }
-      if (!parsed.dailyRecords) parsed.dailyRecords = {};
+      if (!parsed.habits || parsed.habits.length === 0) parsed.habits = DEFAULT_HABITS;
+      if (!parsed.exerciseDatabase || parsed.exerciseDatabase.length === 0) parsed.exerciseDatabase = DEFAULT_EXERCISES;
+      if (!parsed.nutritionTargets) parsed.nutritionTargets = DEFAULT_NUTRITION_TARGETS;
+      if (!parsed.workouts) parsed.workouts = {};
+      if (!parsed.foodEntries) parsed.foodEntries = {};
+      if (!parsed.waterLogs) parsed.waterLogs = {};
+      if (!parsed.bodyMeasurements) parsed.bodyMeasurements = {};
       if (!parsed.goals) parsed.goals = [];
       return parsed;
     }
 
-    // Check for legacy storage format
-    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+    // Try V1 migration
+    const v1Raw = localStorage.getItem(LEGACY_STORAGE_KEY_V1);
     const initialData = createInitialData();
 
-    if (legacyRaw) {
-      const legacyData = JSON.parse(legacyRaw);
-      // Migrate legacy YYYY-MM-DD records
-      Object.entries(legacyData).forEach(([dateStr, habitsMap]) => {
+    if (v1Raw) {
+      const v1Data = JSON.parse(v1Raw);
+      initialData.habits = v1Data.habits || DEFAULT_HABITS;
+      initialData.dailyRecords = v1Data.dailyRecords || {};
+      initialData.goals = v1Data.goals || initialData.goals;
+      saveMomentumData(initialData);
+      return initialData;
+    }
+
+    // Try original legacy migration
+    const origRaw = localStorage.getItem(LEGACY_STORAGE_KEY_ORIGINAL);
+    if (origRaw) {
+      const origData = JSON.parse(origRaw);
+      Object.entries(origData).forEach(([dateStr, habitsMap]) => {
         initialData.dailyRecords[dateStr] = {
           habits: habitsMap,
-          score: calculateDailyScore(habitsMap, DEFAULT_HABITS),
+          score: calculateHabitScore(habitsMap, DEFAULT_HABITS),
           updatedAt: new Date().toISOString()
         };
       });
@@ -70,14 +99,18 @@ export const getMomentumData = () => {
 
     return initialData;
   } catch (error) {
-    console.error('Error reading momentum data from localStorage:', error);
+    console.error('Error reading momentum data:', error);
     return createInitialData();
   }
 };
 
-// Save entire MOMENTUM data tree to LocalStorage
+// Save entire MOMENTUM data tree
 export const saveMomentumData = (data) => {
   try {
+    // Recalculate PRs automatically whenever data is saved
+    if (data.workouts) {
+      data.personalRecords = detectPersonalRecords(data.workouts);
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     return true;
   } catch (error) {
@@ -86,58 +119,93 @@ export const saveMomentumData = (data) => {
   }
 };
 
-// Helper: Save updated habits list
-export const saveHabitsList = (habitsList) => {
+// Workouts CRUD
+export const saveWorkout = (dateStr, workoutLog) => {
   const data = getMomentumData();
-  data.habits = habitsList;
-  saveMomentumData(data);
-  return data;
-};
-
-// Helper: Save daily record for a date
-export const saveDailyRecord = (dateStr, habitsMap, morningFocus = null, eveningReflection = null) => {
-  const data = getMomentumData();
-  const existingRecord = data.dailyRecords[dateStr] || {};
-  
-  const updatedHabits = habitsMap !== null ? habitsMap : (existingRecord.habits || {});
-  const activeHabits = (data.habits || DEFAULT_HABITS).filter(h => h.active !== false);
-  const score = calculateDailyScore(updatedHabits, activeHabits);
-
-  data.dailyRecords[dateStr] = {
-    ...existingRecord,
-    habits: updatedHabits,
-    score,
-    morningFocus: morningFocus !== null ? morningFocus : existingRecord.morningFocus,
-    eveningReflection: eveningReflection !== null ? eveningReflection : existingRecord.eveningReflection,
-    updatedAt: new Date().toISOString(),
-  };
-
-  saveMomentumData(data);
-  return data;
-};
-
-// Helper: Add or edit a Goal
-export const saveGoal = (goal) => {
-  const data = getMomentumData();
-  const index = data.goals.findIndex(g => g.id === goal.id);
-  if (index >= 0) {
-    data.goals[index] = { ...data.goals[index], ...goal };
+  if (!data.workouts[dateStr]) {
+    data.workouts[dateStr] = [];
+  }
+  const existingIdx = data.workouts[dateStr].findIndex(w => w.id === workoutLog.id);
+  if (existingIdx >= 0) {
+    data.workouts[dateStr][existingIdx] = workoutLog;
   } else {
-    data.goals.push(goal);
+    data.workouts[dateStr].push(workoutLog);
   }
   saveMomentumData(data);
   return data;
 };
 
-// Helper: Delete a Goal
-export const deleteGoal = (goalId) => {
+export const deleteWorkout = (dateStr, workoutId) => {
   const data = getMomentumData();
-  data.goals = data.goals.filter(g => g.id !== goalId);
+  if (data.workouts[dateStr]) {
+    data.workouts[dateStr] = data.workouts[dateStr].filter(w => w.id !== workoutId);
+  }
   saveMomentumData(data);
   return data;
 };
 
-// Backward compatibility helpers for existing components
+// Food Entries CRUD
+export const saveFoodEntry = (dateStr, foodEntry) => {
+  const data = getMomentumData();
+  if (!data.foodEntries[dateStr]) {
+    data.foodEntries[dateStr] = [];
+  }
+  const existingIdx = data.foodEntries[dateStr].findIndex(f => f.id === foodEntry.id);
+  if (existingIdx >= 0) {
+    data.foodEntries[dateStr][existingIdx] = foodEntry;
+  } else {
+    data.foodEntries[dateStr].push(foodEntry);
+  }
+  saveMomentumData(data);
+  return data;
+};
+
+export const deleteFoodEntry = (dateStr, foodId) => {
+  const data = getMomentumData();
+  if (data.foodEntries[dateStr]) {
+    data.foodEntries[dateStr] = data.foodEntries[dateStr].filter(f => f.id !== foodId);
+  }
+  saveMomentumData(data);
+  return data;
+};
+
+// Water Log CRUD
+export const saveWaterLog = (dateStr, liters) => {
+  const data = getMomentumData();
+  data.waterLogs[dateStr] = Math.max(0, Number(liters.toFixed(1)));
+  saveMomentumData(data);
+  return data;
+};
+
+// Body Measurements CRUD
+export const saveBodyMeasurement = (dateStr, measurementObj) => {
+  const data = getMomentumData();
+  data.bodyMeasurements[dateStr] = {
+    ...(data.bodyMeasurements[dateStr] || {}),
+    ...measurementObj,
+    date: dateStr,
+    updatedAt: new Date().toISOString()
+  };
+  saveMomentumData(data);
+  return data;
+};
+
+// Settings CRUD
+export const saveNutritionTargets = (targets) => {
+  const data = getMomentumData();
+  data.nutritionTargets = { ...data.nutritionTargets, ...targets };
+  saveMomentumData(data);
+  return data;
+};
+
+export const saveWeightGoal = (weightGoalObj) => {
+  const data = getMomentumData();
+  data.weightGoal = { ...data.weightGoal, ...weightGoalObj };
+  saveMomentumData(data);
+  return data;
+};
+
+// Backward compatibility exports for components
 export const getAllData = () => {
   const data = getMomentumData();
   const legacyMap = {};
@@ -153,7 +221,14 @@ export const getHabitsForDate = (dateStr) => {
 };
 
 export const saveHabitsForDate = (dateStr, habitsMap) => {
-  saveDailyRecord(dateStr, habitsMap);
+  const data = getMomentumData();
+  const existing = data.dailyRecords[dateStr] || {};
+  data.dailyRecords[dateStr] = {
+    ...existing,
+    habits: habitsMap,
+    updatedAt: new Date().toISOString()
+  };
+  saveMomentumData(data);
   return true;
 };
 

@@ -1,23 +1,34 @@
 /**
- * analyticsUtils.js - Analytics & Streak Engine for MOMENTUM
+ * analyticsUtils.js - Analytics & Transformation Score Engine for MOMENTUM Phase 2
  */
 
-// Calculate deterministic daily score (0 - 100) based on active habit completion
-export const calculateDailyScore = (habitsCompletedMap = {}, activeHabits = []) => {
+// Calculate habit completion percentage
+export const calculateHabitScore = (habitsCompletedMap = {}, activeHabits = []) => {
   if (!activeHabits || activeHabits.length === 0) return 0;
-  
-  let totalWeight = 0;
-  let completedWeight = 0;
-
+  let completed = 0;
   activeHabits.forEach(habit => {
-    totalWeight += 1;
-    if (habitsCompletedMap[habit.id]) {
-      completedWeight += 1;
-    }
+    if (habitsCompletedMap[habit.id]) completed++;
   });
+  return Math.round((completed / activeHabits.length) * 100);
+};
 
-  if (totalWeight === 0) return 0;
-  return Math.round((completedWeight / totalWeight) * 100);
+// Calculate Unified Transformation Score (0-100)
+export const calculateTransformationScore = ({
+  habitsScore = 0,
+  workoutCompleted = false,
+  nutritionPct = 0,
+  waterPct = 0,
+  goalsPct = 0,
+}) => {
+  // Weights: Habits 35%, Fitness 25%, Nutrition 20%, Water 10%, Goals 10%
+  const habitWeight = (habitsScore * 0.35);
+  const workoutWeight = (workoutCompleted ? 100 : 0) * 0.25;
+  const nutritionWeight = (Math.min(100, nutritionPct) * 0.20);
+  const waterWeight = (Math.min(100, waterPct) * 0.10);
+  const goalsWeight = (Math.min(100, goalsPct) * 0.10);
+
+  const total = habitWeight + workoutWeight + nutritionWeight + waterWeight + goalsWeight;
+  return Math.round(total);
 };
 
 // Calculate streak data (current streak, longest streak, active days count)
@@ -30,17 +41,15 @@ export const calculateStreaks = (dailyRecordsMap = {}, activeHabits = [], todayS
   let totalActiveDays = 0;
   let longestStreak = 0;
 
-  // We consider a day "successful" if completion percentage is >= 50%
   const isDaySuccessful = (dateStr) => {
     const record = dailyRecordsMap[dateStr];
     if (!record || !record.habits) return false;
     const score = record.score !== undefined 
       ? record.score 
-      : calculateDailyScore(record.habits, activeHabits);
+      : calculateHabitScore(record.habits, activeHabits);
     return score >= 50;
   };
 
-  // Calculate streaks iteratively over sorted historical dates
   const today = new Date(todayStr || new Date());
   
   const formatDate = (d) => {
@@ -53,7 +62,6 @@ export const calculateStreaks = (dailyRecordsMap = {}, activeHabits = [], todayS
   const todayFormatted = formatDate(today);
   const todaySuccessful = isDaySuccessful(todayFormatted);
 
-  // If today isn't done yet, check if yesterday was done to preserve active streak
   let startDate = new Date(today);
   if (!todaySuccessful) {
     startDate.setDate(startDate.getDate() - 1);
@@ -61,7 +69,6 @@ export const calculateStreaks = (dailyRecordsMap = {}, activeHabits = [], todayS
 
   let currentStreak = 0;
   let cursor = new Date(startDate);
-  // Prevent infinite loop safety check (max 3650 days)
   for (let i = 0; i < 3650; i++) {
     const formatted = formatDate(cursor);
     if (isDaySuccessful(formatted)) {
@@ -72,7 +79,6 @@ export const calculateStreaks = (dailyRecordsMap = {}, activeHabits = [], todayS
     }
   }
 
-  // Calculate overall longest streak across all recorded history
   let running = 0;
   const allRecordedDates = Object.keys(dailyRecordsMap).sort();
   if (allRecordedDates.length > 0) {
@@ -118,7 +124,7 @@ export const calculateRangeConsistency = (dailyRecordsMap = {}, activeHabits = [
     if (record) {
       const score = record.score !== undefined 
         ? record.score 
-        : calculateDailyScore(record.habits, activeHabits);
+        : calculateHabitScore(record.habits, activeHabits);
       totalEarnedScore += score;
     }
   }
@@ -128,15 +134,14 @@ export const calculateRangeConsistency = (dailyRecordsMap = {}, activeHabits = [
 
 // Calculate Heatmap intensity level (0 to 5) based on daily score
 export const getHeatmapLevel = (score) => {
-  if (score === 0 || score === undefined || score === null) return 0; // Empty / 0%
-  if (score <= 25) return 1;  // 1-25% (Weak)
-  if (score <= 50) return 2;  // 26-50% (Average)
-  if (score <= 75) return 3;  // 51-75% (Good)
-  if (score < 100) return 4;  // 76-99% (Great)
-  return 5;                   // 100% (Perfect)
+  if (score === 0 || score === undefined || score === null) return 0;
+  if (score <= 25) return 1;
+  if (score <= 50) return 2;
+  if (score <= 75) return 3;
+  if (score < 100) return 4;
+  return 5;
 };
 
-// Color mapping for Heatmap levels & Calendar badges
 export const HEATMAP_COLORS = {
   0: 'bg-white/5 border-white/5',
   1: 'bg-emerald-950/60 border-emerald-800/40 text-emerald-300',
@@ -145,3 +150,6 @@ export const HEATMAP_COLORS = {
   4: 'bg-accent-primary/80 border-accent-primary/60 text-dark-900 font-bold',
   5: 'bg-accent-primary border-accent-primary text-dark-900 shadow-glow font-bold',
 };
+
+// Backward compatibility alias
+export const calculateDailyScore = calculateHabitScore;

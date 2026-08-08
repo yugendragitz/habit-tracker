@@ -1,10 +1,11 @@
 import { useState } from 'react';
 
-export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal, onToggleGoal, onDeleteGoal }) {
+export default function GoalsPanel({ goals, habitsList, dailyRecords, workoutsMap, foodEntriesMap, onAddGoal, onToggleGoal, onDeleteGoal }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Personal');
-  const [targetDays, setTargetDays] = useState(20);
+  const [category, setCategory] = useState('Fitness');
+  const [targetValue, setTargetValue] = useState(20);
+  const [unit, setUnit] = useState('days');
   const [linkedHabitId, setLinkedHabitId] = useState('');
 
   const handleSubmit = (e) => {
@@ -13,31 +14,41 @@ export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal,
     onAddGoal({
       title: title.trim(),
       category,
-      targetDays: Number(targetDays),
-      linkedHabitId: linkedHabitId || null,
+      targetValue: Number(targetValue),
+      currentValue: 0,
+      unit,
+      linkedHabitIds: linkedHabitId ? [linkedHabitId] : [],
     });
     setTitle('');
-    setTargetDays(20);
+    setTargetValue(20);
     setLinkedHabitId('');
     setShowAddForm(false);
   };
 
-  // Helper to calculate target progress from historical dailyRecords
+  // Dynamic progress calculator based on actual recorded historical data
   const calculateGoalProgress = (goal) => {
+    if (goal.unit === 'kg') return goal.currentValue || 0;
+    
     let count = 0;
+    if (goal.category === 'Fitness' && goal.unit === 'workouts') {
+      Object.values(workoutsMap || {}).forEach(logs => {
+        count += (logs || []).length;
+      });
+      return Math.min(count, goal.targetValue);
+    }
+
     Object.values(dailyRecords || {}).forEach(rec => {
-      if (goal.linkedHabitId) {
-        if (rec.habits && rec.habits[goal.linkedHabitId]) {
+      if (goal.linkedHabitIds && goal.linkedHabitIds.length > 0) {
+        if (rec.habits && rec.habits[goal.linkedHabitIds[0]]) {
           count++;
         }
       } else {
-        // If unlinked, count days with score >= 50%
-        if (rec.score >= 50) {
+        if ((rec.score || 0) >= 50) {
           count++;
         }
       }
     });
-    return Math.min(count, goal.targetDays);
+    return Math.min(count, goal.targetValue);
   };
 
   return (
@@ -47,10 +58,10 @@ export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal,
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 card bg-gradient-to-br from-accent-primary/10 to-cyan-500/10 border-accent-primary/30">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            🎯 Goals & Consistency Milestones
+            🎯 Goals & Habit Connections
           </h2>
           <p className="text-xs text-white/60 mt-1">
-            Define long-term consistency targets linked to your core daily habits.
+            Define personal transformation targets connected to your habits, workouts, and body metrics.
           </p>
         </div>
         <button
@@ -64,31 +75,45 @@ export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal,
       {/* Add Goal Form */}
       {showAddForm && (
         <form onSubmit={handleSubmit} className="card p-6 space-y-4 animate-fadeIn border-white/20">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Create Consistency Goal</h3>
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Create Personal Goal</h3>
           
           <div>
             <label className="block text-xs text-white/70 mb-1">Goal Title *</label>
             <input
               type="text"
               required
-              placeholder="e.g. Master Boxing Routine or 20 Workout Days"
+              placeholder="e.g. Bench Press 60kg or 20 Workout Days"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-white/10 text-white placeholder-white/30 text-sm focus:border-accent-primary focus:outline-none"
+              className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-white/10 text-white text-sm focus:border-accent-primary focus:outline-none"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs text-white/70 mb-1">Target Successful Days</label>
+              <label className="block text-xs text-white/70 mb-1">Target Value</label>
               <input
                 type="number"
                 min="1"
-                max="365"
-                value={targetDays}
-                onChange={(e) => setTargetDays(e.target.value)}
+                max="10000"
+                value={targetValue}
+                onChange={(e) => setTargetValue(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-dark-900 border border-white/10 text-white text-sm focus:border-accent-primary focus:outline-none"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs text-white/70 mb-1">Unit</label>
+              <select
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-dark-900 border border-white/10 text-white text-sm focus:border-accent-primary focus:outline-none"
+              >
+                <option value="days">days</option>
+                <option value="workouts">workouts</option>
+                <option value="kg">kg</option>
+                <option value="kcal">kcal</option>
+              </select>
             </div>
 
             <div>
@@ -98,7 +123,7 @@ export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal,
                 onChange={(e) => setLinkedHabitId(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl bg-dark-900 border border-white/10 text-white text-sm focus:border-accent-primary focus:outline-none"
               >
-                <option value="">Any Habit (General Consistency)</option>
+                <option value="">Any Activity (General)</option>
                 {habitsList.map(h => (
                   <option key={h.id} value={h.id}>{h.icon} {h.name}</option>
                 ))}
@@ -112,10 +137,11 @@ export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal,
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-xl bg-dark-900 border border-white/10 text-white text-sm focus:border-accent-primary focus:outline-none"
               >
-                <option value="Health">Health</option>
                 <option value="Fitness">Fitness</option>
-                <option value="Mind">Mind</option>
-                <option value="Productivity">Productivity</option>
+                <option value="Nutrition">Nutrition</option>
+                <option value="Study">Study</option>
+                <option value="Skills">Skills</option>
+                <option value="Career">Career</option>
                 <option value="Personal">Personal</option>
               </select>
             </div>
@@ -136,9 +162,9 @@ export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal,
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {goals.map((goal) => {
           const currentProgress = calculateGoalProgress(goal);
-          const percentage = Math.round((currentProgress / goal.targetDays) * 100);
+          const percentage = Math.round((currentProgress / (goal.targetValue || 1)) * 100);
           const isDone = goal.completed || percentage >= 100;
-          const linkedHabit = habitsList.find(h => h.id === goal.linkedHabitId);
+          const linkedHabit = habitsList.find(h => h.id === goal.linkedHabitIds?.[0]);
 
           return (
             <div 
@@ -187,7 +213,7 @@ export default function GoalsPanel({ goals, habitsList, dailyRecords, onAddGoal,
               <div className="space-y-1.5 mt-4">
                 <div className="flex justify-between text-xs font-medium">
                   <span className="text-white/60">Progress</span>
-                  <span className="text-accent-primary font-bold">{currentProgress} / {goal.targetDays} Days ({percentage}%)</span>
+                  <span className="text-accent-primary font-bold">{currentProgress} / {goal.targetValue} {goal.unit || 'days'} ({percentage}%)</span>
                 </div>
                 <div className="w-full h-2.5 rounded-full bg-dark-900 overflow-hidden border border-white/5">
                   <div 
