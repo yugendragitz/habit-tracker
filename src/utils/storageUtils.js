@@ -156,3 +156,86 @@ export const saveHabitsForDate = (dateStr, habitsMap) => {
   saveDailyRecord(dateStr, habitsMap);
   return true;
 };
+
+export const getHabitsForMonth = (year, month) => {
+  const allData = getAllData();
+  const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const monthData = {};
+  Object.keys(allData).forEach((date) => {
+    if (date.startsWith(monthPrefix)) {
+      monthData[date] = allData[date];
+    }
+  });
+  return monthData;
+};
+
+export const getHabitsForYear = (year) => {
+  const allData = getAllData();
+  const yearPrefix = `${year}-`;
+  const yearData = {};
+  Object.keys(allData).forEach((date) => {
+    if (date.startsWith(yearPrefix)) {
+      yearData[date] = allData[date];
+    }
+  });
+  return yearData;
+};
+
+export const getMonthlyStats = (year, month, habitList = []) => {
+  const monthData = getHabitsForMonth(year, month);
+  const totalHabits = habitList.length;
+  const daysTracked = Object.keys(monthData).length;
+  let totalCompleted = 0;
+  let totalPossible = 0;
+  const habitStats = {};
+  habitList.forEach(habit => {
+    habitStats[habit.id] = { completed: 0, total: daysTracked };
+  });
+  Object.entries(monthData).forEach(([date, habits]) => {
+    totalPossible += totalHabits;
+    Object.entries(habits).forEach(([habitId, completed]) => {
+      if (completed) {
+        totalCompleted++;
+        if (habitStats[habitId]) {
+          habitStats[habitId].completed++;
+        }
+      }
+    });
+  });
+  return {
+    daysTracked,
+    totalCompleted,
+    totalPossible,
+    percentage: totalPossible > 0 ? (totalCompleted / totalPossible) * 100 : 0,
+    habitStats
+  };
+};
+
+export const getYearlyStats = (year, habitList = []) => {
+  const yearData = getHabitsForYear(year);
+  const totalHabits = habitList.length;
+  const daysTracked = Object.keys(yearData).length;
+  let totalCompleted = 0;
+  const monthlyProgress = new Array(12).fill(0);
+  const monthlyDays = new Array(12).fill(0);
+  Object.entries(yearData).forEach(([date, habits]) => {
+    const month = parseInt(date.split('-')[1], 10) - 1;
+    const completedCount = Object.values(habits).filter(Boolean).length;
+    totalCompleted += completedCount;
+    if (month >= 0 && month < 12) {
+      monthlyProgress[month] += completedCount;
+      monthlyDays[month]++;
+    }
+  });
+  const monthlyPercentages = monthlyProgress.map((progress, i) => {
+    const possible = monthlyDays[i] * totalHabits;
+    return possible > 0 ? (progress / possible) * 100 : 0;
+  });
+  return {
+    daysTracked,
+    totalCompleted,
+    totalPossible: daysTracked * totalHabits,
+    percentage: daysTracked > 0 ? (totalCompleted / (daysTracked * totalHabits)) * 100 : 0,
+    monthlyPercentages
+  };
+};
