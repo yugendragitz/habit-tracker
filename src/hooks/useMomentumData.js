@@ -78,7 +78,15 @@ export const useMomentumData = (userId = null) => {
   const waterLogsMap = useMemo(() => data.waterLogs || {}, [data.waterLogs]);
   const bodyMeasurementsMap = useMemo(() => data.bodyMeasurements || {}, [data.bodyMeasurements]);
   const goals = useMemo(() => data.goals || [], [data.goals]);
-  const nutritionTargets = useMemo(() => data.nutritionTargets || {}, [data.nutritionTargets]);
+  const nutritionTargets = useMemo(() => {
+    const t = data.nutritionTargets || {};
+    return {
+      ...t,
+      dailyCalories: Math.max(3000, t.dailyCalories || 3000),
+      dailyProteinGrams: Math.max(160, t.dailyProteinGrams || 160),
+      dailyWaterLiters: Math.max(4.0, t.dailyWaterLiters || 4.0),
+    };
+  }, [data.nutritionTargets]);
   const weightGoal = useMemo(() => data.weightGoal || {}, [data.weightGoal]);
 
   // Personal Records

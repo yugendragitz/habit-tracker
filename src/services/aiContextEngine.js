@@ -133,9 +133,9 @@ export const buildAIContext = ({
       eveningNote: todayRecord.eveningReflection?.note || null,
     },
     targets: {
-      dailyCalories: nutritionTargets.dailyCalories || 3000,
-      dailyProteinGrams: nutritionTargets.dailyProteinGrams || 160,
-      dailyWaterLiters: nutritionTargets.dailyWaterLiters || 4.0,
+      dailyCalories: Math.max(3000, nutritionTargets.dailyCalories || 3000),
+      dailyProteinGrams: Math.max(160, nutritionTargets.dailyProteinGrams || 160),
+      dailyWaterLiters: Math.max(4.0, nutritionTargets.dailyWaterLiters || 4.0),
       weightGoalKg: weightGoal.targetWeightKg || 65.0,
     },
     weightProgress: {

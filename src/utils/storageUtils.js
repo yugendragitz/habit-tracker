@@ -61,7 +61,16 @@ export const getMomentumData = () => {
       const parsed = JSON.parse(raw);
       if (!parsed.habits || parsed.habits.length === 0) parsed.habits = DEFAULT_HABITS;
       if (!parsed.exerciseDatabase || parsed.exerciseDatabase.length === 0) parsed.exerciseDatabase = DEFAULT_EXERCISES;
-      if (!parsed.nutritionTargets) parsed.nutritionTargets = DEFAULT_NUTRITION_TARGETS;
+      if (!parsed.nutritionTargets || parsed.nutritionTargets.dailyCalories < 3000 || parsed.nutritionTargets.dailyWaterLiters < 4.0) {
+        parsed.nutritionTargets = {
+          ...DEFAULT_NUTRITION_TARGETS,
+          ...(parsed.nutritionTargets || {}),
+          dailyCalories: Math.max(3000, parsed.nutritionTargets?.dailyCalories || 3000),
+          dailyProteinGrams: Math.max(160, parsed.nutritionTargets?.dailyProteinGrams || 160),
+          dailyWaterLiters: Math.max(4.0, parsed.nutritionTargets?.dailyWaterLiters || 4.0),
+        };
+        saveMomentumData(parsed);
+      }
       if (!parsed.workouts) parsed.workouts = {};
       if (!parsed.foodEntries) parsed.foodEntries = {};
       if (!parsed.waterLogs) parsed.waterLogs = {};
