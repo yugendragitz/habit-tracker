@@ -60,7 +60,7 @@ export default function DailyCheckIn({ selectedDate, dailyRecord, onSaveMorningF
         <p className="text-xs text-white/50 mb-2">What is your single main focus for today?</p>
         <input
           type="text"
-          placeholder="e.g., Complete project milestone & hit 3L water intake"
+          placeholder="e.g., Complete project milestone & hit 4L water intake"
           value={morningFocus}
           onChange={(e) => setMorningFocus(e.target.value)}
           onBlur={handleFocusBlur}

@@ -97,7 +97,7 @@ function generateLocalRuleResponse(action, aiContext = {}, userMessage = '', foo
     let reply = `Based on your recent data: Your 7-day habit consistency is ${stats7Day.habitConsistency || 80}%. `;
     
     if (q.includes('month') || q.includes('doing')) {
-      reply += `This month you have completed ${stats7Day.workoutCount || 3} workouts with an average of ${stats7Day.avgCalories || 2700} kcal/day and ${stats7Day.avgWater || 3.5}L water/day.`;
+      reply += `This month you have completed ${stats7Day.workoutCount || 3} workouts with an average of ${stats7Day.avgCalories || 3100} kcal/day and ${stats7Day.avgWater || 4.0}L water/day.`;
     } else if (q.includes('gym') || q.includes('workout') || q.includes('bench')) {
       reply += `Your training volume is strong at ${stats7Day.totalVolume?.toLocaleString() || 0} kg this week. Focus on progressive overload and meeting your ${targets.dailyProteinGrams || 160}g protein target!`;
     } else if (q.includes('eat') || q.includes('food') || q.includes('nutrition')) {
