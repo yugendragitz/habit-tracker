@@ -4,7 +4,7 @@
 
 export const DEFAULT_NUTRITION_TARGETS = {
   dailyCalories: 3000,
-  dailyProteinGrams: 160,
+  dailyProteinGrams: 130,
   dailyCarbsGrams: 350,
   dailyFatGrams: 80,
   dailyWaterLiters: 4.0,

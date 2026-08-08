@@ -30,7 +30,7 @@ export default function NutritionTrackerView({
 
   // Targets Form state
   const [targetCals, setTargetCals] = useState(nutritionTargets.dailyCalories || 3000);
-  const [targetProt, setTargetProt] = useState(nutritionTargets.dailyProteinGrams || 160);
+  const [targetProt, setTargetProt] = useState(nutritionTargets.dailyProteinGrams || 130);
   const [targetCarbs, setTargetCarbs] = useState(nutritionTargets.dailyCarbsGrams || 350);
   const [targetFat, setTargetFat] = useState(nutritionTargets.dailyFatGrams || 80);
   const [targetWater, setTargetWater] = useState(nutritionTargets.dailyWaterLiters || 4.0);

@@ -134,7 +134,7 @@ export const buildAIContext = ({
     },
     targets: {
       dailyCalories: Math.max(3000, nutritionTargets.dailyCalories || 3000),
-      dailyProteinGrams: Math.max(160, nutritionTargets.dailyProteinGrams || 160),
+      dailyProteinGrams: nutritionTargets.dailyProteinGrams || 130,
       dailyWaterLiters: Math.max(4.0, nutritionTargets.dailyWaterLiters || 4.0),
       weightGoalKg: weightGoal.targetWeightKg || 65.0,
     },
