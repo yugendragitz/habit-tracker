@@ -1,65 +1,115 @@
 /**
- * Habit definitions with icons and colors
+ * habits.js - Default habit definitions and category definitions for MOMENTUM
  */
 
-export const HABITS = [
+export const HABIT_CATEGORIES = [
+  { id: 'Health', name: 'Health & Wellness', color: '#34d399', icon: '🥗' },
+  { id: 'Fitness', name: 'Fitness & Physical', color: '#f87171', icon: '💪' },
+  { id: 'Mind', name: 'Mindset & Mental', color: '#a78bfa', icon: '🧘' },
+  { id: 'Productivity', name: 'Study & Skill', color: '#fbbf24', icon: '📚' },
+  { id: 'Personal', name: 'Personal Growth', color: '#00ffc8', icon: '🎯' },
+];
+
+export const DEFAULT_HABITS = [
   {
     id: 'sleep',
     name: 'Sleep',
-    description: '7+ hours',
+    description: '7+ hours of deep rest',
     icon: '🌙',
-    color: '#a78bfa', // Purple
+    color: '#a78bfa',
+    category: 'Health',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'clean-food',
     name: 'Clean Food',
-    description: 'Healthy eating',
+    description: 'Healthy whole foods & nutrition',
     icon: '🥗',
-    color: '#34d399', // Green
+    color: '#34d399',
+    category: 'Health',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'water',
     name: 'Water Intake',
-    description: '3L minimum',
+    description: '3 Liters minimum',
     icon: '💧',
-    color: '#60a5fa', // Blue
+    color: '#60a5fa',
+    category: 'Health',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'gym',
-    name: 'Gym',
-    description: 'Workout session',
+    name: 'Gym Workout',
+    description: 'Strength or cardio session',
     icon: '💪',
-    color: '#f87171', // Red
+    color: '#f87171',
+    category: 'Fitness',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'boxing',
-    name: 'Boxing',
-    description: 'Combat training',
+    name: 'Boxing Training',
+    description: 'Combat sports & conditioning',
     icon: '🥊',
-    color: '#fb923c', // Orange
+    color: '#fb923c',
+    category: 'Fitness',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'study',
-    name: 'Study',
-    description: 'Learning time',
+    name: 'Focused Study',
+    description: 'Deep work & learning session',
     icon: '📚',
-    color: '#fbbf24', // Yellow
+    color: '#fbbf24',
+    category: 'Productivity',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'skill-building',
     name: 'Skill Building',
-    description: 'Practice & improve',
+    description: 'Practice & master your craft',
     icon: '🎯',
-    color: '#00ffc8', // Accent
+    color: '#00ffc8',
+    category: 'Productivity',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'self-care',
     name: 'Self Care',
-    description: 'Mind & body',
+    description: 'Mindfulness & recovery',
     icon: '🧘',
-    color: '#f472b6', // Pink
+    color: '#f472b6',
+    category: 'Mind',
+    frequency: 'daily',
+    target: 1,
+    active: true,
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
 ];
+
+export const HABITS = DEFAULT_HABITS;
 
 export const MOTIVATIONAL_QUOTES = [
   "Discipline is the bridge between goals and accomplishment.",
@@ -74,13 +124,6 @@ export const MOTIVATIONAL_QUOTES = [
   "Consistency is what transforms average into excellence.",
 ];
 
-// Get a random motivational quote
-export const getRandomQuote = () => {
-  const index = Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length);
-  return MOTIVATIONAL_QUOTES[index];
-};
-
-// Get quote based on day of year (consistent daily quote)
 export const getDailyQuote = () => {
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
