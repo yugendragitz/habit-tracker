@@ -16,7 +16,7 @@ import {
   calculateDailyScore, 
   calculateStreaks, 
   calculateRangeConsistency 
-} from '../analyticsUtils';
+} from '../utils/analyticsUtils';
 
 export const useMomentumData = (userId = null) => {
   const [selectedDate, setSelectedDate] = useState(getToday());
