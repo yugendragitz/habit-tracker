@@ -99,10 +99,10 @@ function generateLocalRuleResponse(action, aiContext = {}, userMessage = '', foo
     if (q.includes('month') || q.includes('doing')) {
       reply += `This month you have completed ${stats7Day.workoutCount || 3} workouts with an average of ${stats7Day.avgCalories || 3100} kcal/day and ${stats7Day.avgWater || 4.0}L water/day.`;
     } else if (q.includes('gym') || q.includes('workout') || q.includes('bench')) {
-      reply += `Your training volume is strong at ${stats7Day.totalVolume?.toLocaleString() || 0} kg this week. Focus on progressive overload and meeting your ${targets.dailyProteinGrams || 160}g protein target!`;
+      reply += `Your training volume is strong at ${stats7Day.totalVolume?.toLocaleString() || 0} kg this week. Focus on progressive overload and meeting your ${targets.dailyProteinGrams || 130}g protein target!`;
     } else if (q.includes('eat') || q.includes('food') || q.includes('nutrition')) {
       const remCal = Math.max(0, (targets.dailyCalories || 3000) - (today.calories || 0));
-      const remProt = Math.max(0, (targets.dailyProteinGrams || 160) - (today.protein || 0));
+      const remProt = Math.max(0, (targets.dailyProteinGrams || 130) - (today.protein || 0));
       reply += `You have approx ${remCal} kcal and ${remProt}g protein remaining today. Prioritize a protein-dense meal such as chicken breast, eggs, or paneer.`;
     } else {
       reply += `Your current priorities today: 1) Hit your 4.0L water intake for creatine support, 2) Complete your planned workout, and 3) Stay on top of your habit routine.`;

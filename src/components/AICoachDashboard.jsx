@@ -300,7 +300,7 @@ export default function AICoachDashboard({ selectedDate, fullAppData, onOpenAIFo
               <span className="w-6 h-6 rounded-full bg-accent-primary text-dark-900 font-extrabold flex items-center justify-center text-xs">2</span>
               <div>
                 <strong className="text-white block">Protein & Nutrition Reset</strong>
-                <span className="text-white/50">Hit your 3000 kcal & 160g protein target without skipping meals.</span>
+                <span className="text-white/50">Hit your 3000 kcal & 130g protein target without skipping meals.</span>
               </div>
             </div>
 

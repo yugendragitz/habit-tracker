@@ -83,7 +83,7 @@ export const useMomentumData = (userId = null) => {
     return {
       ...t,
       dailyCalories: Math.max(3000, t.dailyCalories || 3000),
-      dailyProteinGrams: t.dailyProteinGrams || 130,
+      dailyProteinGrams: (!t.dailyProteinGrams || t.dailyProteinGrams === 140 || t.dailyProteinGrams === 160) ? 130 : t.dailyProteinGrams,
       dailyWaterLiters: Math.max(4.0, t.dailyWaterLiters || 4.0),
     };
   }, [data.nutritionTargets]);
