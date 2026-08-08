@@ -3,11 +3,11 @@
  */
 
 export const DEFAULT_NUTRITION_TARGETS = {
-  dailyCalories: 2500,
-  dailyProteinGrams: 140,
-  dailyCarbsGrams: 300,
-  dailyFatGrams: 70,
-  dailyWaterLiters: 3.0,
+  dailyCalories: 3000,
+  dailyProteinGrams: 160,
+  dailyCarbsGrams: 350,
+  dailyFatGrams: 80,
+  dailyWaterLiters: 4.0,
 };
 
 export const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];

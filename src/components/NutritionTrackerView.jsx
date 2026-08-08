@@ -29,11 +29,11 @@ export default function NutritionTrackerView({
   const [fat, setFat] = useState(8);
 
   // Targets Form state
-  const [targetCals, setTargetCals] = useState(nutritionTargets.dailyCalories || 2500);
-  const [targetProt, setTargetProt] = useState(nutritionTargets.dailyProteinGrams || 140);
-  const [targetCarbs, setTargetCarbs] = useState(nutritionTargets.dailyCarbsGrams || 300);
-  const [targetFat, setTargetFat] = useState(nutritionTargets.dailyFatGrams || 70);
-  const [targetWater, setTargetWater] = useState(nutritionTargets.dailyWaterLiters || 3.0);
+  const [targetCals, setTargetCals] = useState(nutritionTargets.dailyCalories || 3000);
+  const [targetProt, setTargetProt] = useState(nutritionTargets.dailyProteinGrams || 160);
+  const [targetCarbs, setTargetCarbs] = useState(nutritionTargets.dailyCarbsGrams || 350);
+  const [targetFat, setTargetFat] = useState(nutritionTargets.dailyFatGrams || 80);
+  const [targetWater, setTargetWater] = useState(nutritionTargets.dailyWaterLiters || 4.0);
 
   const currentWater = waterLogsMap[selectedDate] || 0;
   const foodEntries = foodEntriesMap[selectedDate] || [];
@@ -80,7 +80,7 @@ export default function NutritionTrackerView({
         <div>
           <span className="text-xs font-bold text-accent-primary uppercase tracking-widest">Nutrition & Hydration System</span>
           <h2 className="text-xl font-extrabold text-white mt-1">🥗 Daily Fuel & Macro Tracker</h2>
-          <p className="text-xs text-white/60 mt-1">Track calories, protein, carbs, fats, and water intake for {selectedDate}.</p>
+          <p className="text-xs text-white/60 mt-1">Track calories (3000+ kcal target), protein, carbs, fats, and water (4L Creatine support) for {selectedDate}.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export default function NutritionTrackerView({
         <div className="card p-5 space-y-3">
           <div className="flex justify-between items-center text-xs">
             <span className="text-white/60 font-semibold uppercase">Calories</span>
-            <span className="text-accent-primary font-bold">{currentDailyNutrition.totalCalories} / {nutritionTargets.dailyCalories || 2500} kcal</span>
+            <span className="text-accent-primary font-bold">{currentDailyNutrition.totalCalories} / {nutritionTargets.dailyCalories || 3000} kcal</span>
           </div>
           <ProgressBar percentage={macroStats.caloriePct} showPercentage={false} height={8} />
           <div className="flex justify-between text-[11px] text-white/40 pt-1">

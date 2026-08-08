@@ -38,7 +38,7 @@ export const DEFAULT_HABITS = [
   {
     id: 'water',
     name: 'Water Intake',
-    description: '3 Liters minimum',
+    description: '4 Liters minimum (Creatine support)',
     icon: '💧',
     color: '#60a5fa',
     category: 'Health',

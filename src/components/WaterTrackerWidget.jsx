@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
-export default function WaterTrackerWidget({ selectedDate, currentWaterLiters, targetWaterLiters = 3.0, onAddWaterDelta, onUpdateWaterLog }) {
+export default function WaterTrackerWidget({ selectedDate, currentWaterLiters, targetWaterLiters = 4.0, onAddWaterDelta, onUpdateWaterLog }) {
   const [isEditing, setIsEditing] = useState(false);
   const [manualInput, setManualInput] = useState(currentWaterLiters);
 
-  const pct = Math.min(100, Math.round((currentWaterLiters / (targetWaterLiters || 3.0)) * 100));
+  const pct = Math.min(100, Math.round((currentWaterLiters / (targetWaterLiters || 4.0)) * 100));
 
   const handleManualSave = () => {
     onUpdateWaterLog(selectedDate, Math.max(0, Number(manualInput)));

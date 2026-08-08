@@ -297,7 +297,7 @@ function AppContent() {
                     className="p-3.5 rounded-xl card border-white/10 space-y-1 cursor-pointer hover:border-accent-primary/40 transition-all"
                   >
                     <span className="text-white/40 font-semibold block uppercase text-[10px]">Hydration</span>
-                    <strong className="text-cyan-400 text-sm block">{currentWaterLiters.toFixed(1)} / {nutritionTargets.dailyWaterLiters || 3.0}L</strong>
+                    <strong className="text-cyan-400 text-sm block">{currentWaterLiters.toFixed(1)} / {nutritionTargets.dailyWaterLiters || 4.0}L</strong>
                     <span className="text-[10px] text-white/50">{macroStats.waterPct}% of goal</span>
                   </div>
                 </div>
