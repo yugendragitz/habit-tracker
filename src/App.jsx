@@ -26,6 +26,10 @@ import WaterTrackerWidget from './components/WaterTrackerWidget';
 import BodyMeasurementsView from './components/BodyMeasurementsView';
 import WeeklyMonthlyAnalytics from './components/WeeklyMonthlyAnalytics';
 
+// Phase 3 Components
+import AICoachDashboard from './components/AICoachDashboard';
+import AIFoodLoggerModal from './components/AIFoodLoggerModal';
+
 // Master Hook
 import useMomentumData from './hooks/useMomentumData';
 
@@ -38,13 +42,15 @@ function AppContent() {
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   
   const appRef = useRef(null);
-  const [activeTab, setActiveTab] = useState('today');
+  const [activeTab, setActiveTab] = useState('coach'); // Default to AI Coach for Phase 3!
   const [isHabitManagerOpen, setIsHabitManagerOpen] = useState(false);
   const [isWorkoutLoggerOpen, setIsWorkoutLoggerOpen] = useState(false);
+  const [isAIFoodLoggerOpen, setIsAIFoodLoggerOpen] = useState(false);
   const [inspectingDate, setInspectingDate] = useState(null);
   const hasInitialAnimatedRef = useRef(false);
   
   // Master MOMENTUM hook
+  const momentumData = useMomentumData(user?.uid);
   const {
     selectedDate,
     setSelectedDate,
@@ -96,7 +102,7 @@ function AppContent() {
     addGoal,
     toggleGoal,
     deleteGoal,
-  } = useMomentumData(user?.uid);
+  } = momentumData;
 
   const currentYear = getCurrentYear();
   const currentMonth = getCurrentMonth();
@@ -188,6 +194,7 @@ function AppContent() {
           {/* Navigation Tabs */}
           <div className="flex gap-1.5 overflow-x-auto pb-1 md:pb-0">
             {[
+              { id: 'coach', label: '🤖 AI Coach' },
               { id: 'today', label: '⚡ Today' },
               { id: 'fitness', label: '🏋️ Workout Log' },
               { id: 'nutrition', label: '🥗 Nutrition & Water' },
@@ -203,7 +210,7 @@ function AppContent() {
                 className={`
                   px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300
                   ${activeTab === tab.id 
-                    ? 'bg-accent-primary text-dark-900 shadow-glow scale-105' 
+                    ? 'bg-accent-primary text-dark-900 shadow-glow scale-105 font-black' 
                     : 'bg-dark-700/50 text-white/60 hover:bg-dark-600 hover:text-white'
                   }
                 `}
@@ -224,6 +231,15 @@ function AppContent() {
 
         {/* Tab Content */}
         <div>
+          {/* AI COACH TAB (PHASE 3) */}
+          {activeTab === 'coach' && (
+            <AICoachDashboard
+              selectedDate={selectedDate}
+              fullAppData={momentumData}
+              onOpenAIFoodLogger={() => setIsAIFoodLoggerOpen(true)}
+            />
+          )}
+
           {/* TODAY TAB (UNIFIED DASHBOARD) */}
           {activeTab === 'today' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -345,7 +361,7 @@ function AppContent() {
                 <WaterTrackerWidget
                   selectedDate={selectedDate}
                   currentWaterLiters={currentWaterLiters}
-                  targetWaterLiters={nutritionTargets.dailyWaterLiters || 3.0}
+                  targetWaterLiters={nutritionTargets.dailyWaterLiters || 4.0}
                   onAddWaterDelta={addWaterDelta}
                   onUpdateWaterLog={updateWaterLog}
                 />
@@ -637,6 +653,14 @@ function AppContent() {
           onDeleteHabit={deleteHabit}
         />
 
+        <AIFoodLoggerModal
+          selectedDate={selectedDate}
+          fullAppData={momentumData}
+          isOpen={isAIFoodLoggerOpen}
+          onClose={() => setIsAIFoodLoggerOpen(false)}
+          onSaveFoodEntry={saveFoodEntry}
+        />
+
         <DayDetailModal 
           dateStr={inspectingDate}
           dailyRecord={dailyRecords[inspectingDate]}
@@ -653,7 +677,7 @@ function AppContent() {
         {/* Footer */}
         <footer className="mt-12 pt-6 border-t border-white/5 text-center">
           <p className="text-xs text-white/40">
-            MOMENTUM — Personal Transformation System • Phase 2: UNDERSTAND ME
+            MOMENTUM — Personal Transformation System • Phase 3: COACH ME
           </p>
           <p className="text-xs text-accent-primary font-bold mt-2">
             BUILT BY YUGI
