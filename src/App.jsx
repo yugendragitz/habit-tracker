@@ -2,12 +2,14 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { MotionProvider, useMotion } from './context/MotionContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Components
-import Header from './components/Header';
+// Navigation Shell Components
+import Sidebar from './components/Sidebar';
+import MobileNav from './components/MobileNav';
+import HeroCommandCenter from './components/HeroCommandCenter';
+import TodaysMission from './components/TodaysMission';
 import AnimatedBackground from './components/AnimatedBackground';
-import HabitCard from './components/HabitCard';
-import ProgressRing from './components/ProgressRing';
-import ProgressBar from './components/ProgressBar';
+
+// Existing Components
 import MonthGrid from './components/MonthGrid';
 import YearHeatmap from './components/YearHeatmap';
 import DailyChart from './components/DailyChart';
@@ -16,7 +18,6 @@ import HabitManagerModal from './components/HabitManagerModal';
 import DailyCheckIn from './components/DailyCheckIn';
 import DayDetailModal from './components/DayDetailModal';
 import GoalsPanel from './components/GoalsPanel';
-import HistoryJournal from './components/HistoryJournal';
 
 // Phase 2 Components
 import WorkoutLoggerModal from './components/WorkoutLoggerModal';
@@ -34,15 +35,14 @@ import AIFoodLoggerModal from './components/AIFoodLoggerModal';
 import useMomentumData from './hooks/useMomentumData';
 
 // Utils
-import { getCurrentMonth, getCurrentYear, getToday } from './utils/dateUtils';
-import { formatVolume } from './utils/fitnessUtils';
+import { getCurrentMonth, getCurrentYear } from './utils/dateUtils';
 
 function AppContent() {
   const { gsap, DURATION, EASING } = useMotion();
   const { user, isAuthenticated, logout, loading: authLoading } = useAuth();
   
   const appRef = useRef(null);
-  const [activeTab, setActiveTab] = useState('coach'); // Default to AI Coach for Phase 3!
+  const [activeTab, setActiveTab] = useState('today'); // Default to Today Command Center
   const [isHabitManagerOpen, setIsHabitManagerOpen] = useState(false);
   const [isWorkoutLoggerOpen, setIsWorkoutLoggerOpen] = useState(false);
   const [isAIFoodLoggerOpen, setIsAIFoodLoggerOpen] = useState(false);
@@ -126,10 +126,10 @@ function AppContent() {
   // Auth Loading Screen
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-dark-950">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin" />
-          <span className="text-white/50 text-sm">Authenticating MOMENTUM...</span>
+          <span className="text-white/50 text-xs uppercase tracking-widest font-semibold">AUTHENTICATING MOMENTUM...</span>
         </div>
       </div>
     );
@@ -143,380 +143,204 @@ function AppContent() {
   // Data Loading Screen
   if (!isLoaded) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-900">
+      <div className="min-h-screen flex items-center justify-center bg-dark-950">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-accent-primary/30 border-t-accent-primary rounded-full animate-spin" />
-          <span className="text-white/50 text-sm">Initializing transformation system...</span>
+          <span className="text-white/50 text-xs uppercase tracking-widest font-semibold">INITIALIZING PERFORMANCE OS...</span>
         </div>
       </div>
     );
   }
 
-  const topGoal = goals && goals.length > 0 ? goals[0] : null;
-
   return (
     <div 
       ref={appRef}
-      className="min-h-screen bg-dark-900 text-white font-sans selection:bg-accent-primary selection:text-dark-900"
+      className="min-h-screen bg-dark-950 text-white font-sans selection:bg-accent-primary selection:text-dark-900"
     >
-      {/* Animated Background */}
+      {/* Background System */}
       <AnimatedBackground />
 
-      {/* Main Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        
-        {/* Header */}
-        <Header 
-          userName={user?.displayName || user?.email?.split('@')[0]}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-          currentStreak={streakStats.currentStreak}
-          onOpenHabitManager={() => setIsHabitManagerOpen(true)}
-        />
+      {/* Desktop Left Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        userName={user?.displayName || user?.email?.split('@')[0]}
+        currentStreak={streakStats.currentStreak}
+        onLogout={logout}
+      />
 
-        {/* User Info & Navigation Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 p-4 rounded-2xl bg-dark-800/60 border border-white/5 shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-primary to-cyan-400 flex items-center justify-center text-dark-900 font-extrabold text-sm shadow-glow">
-              {user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'M'}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-bold text-white">{user?.displayName || 'Transformer'}</p>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent-primary/20 text-accent-primary border border-accent-primary/30">
-                  {user?.isAnonymous ? 'Guest Mode' : 'Cloud Synced'}
-                </span>
-              </div>
-              <p className="text-xs text-white/40">{user?.email || 'Local session'}</p>
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex gap-1.5 overflow-x-auto pb-1 md:pb-0">
-            {[
-              { id: 'coach', label: '🤖 AI Coach' },
-              { id: 'today', label: '⚡ Today' },
-              { id: 'fitness', label: '🏋️ Workout Log' },
-              { id: 'nutrition', label: '🥗 Nutrition & Water' },
-              { id: 'body', label: '📐 Body Metrics' },
-              { id: 'analytics', label: '📊 Reviews' },
-              { id: 'habits', label: '⚙️ Habits' },
-              { id: 'calendar', label: '📅 Calendar' },
-              { id: 'goals', label: '🎯 Goals' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`
-                  px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300
-                  ${activeTab === tab.id 
-                    ? 'bg-accent-primary text-dark-900 shadow-glow scale-105 font-black' 
-                    : 'bg-dark-700/50 text-white/60 hover:bg-dark-600 hover:text-white'
-                  }
-                `}
-              >
-                {tab.label}
-              </button>
-            ))}
-            
-            <button
-              onClick={logout}
-              className="px-3 py-2 rounded-xl text-xs text-white/40 hover:text-white hover:bg-white/10 transition-all ml-1"
-              title="Sign Out"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div>
-          {/* AI COACH TAB (PHASE 3) */}
-          {activeTab === 'coach' && (
-            <AICoachDashboard
-              selectedDate={selectedDate}
-              fullAppData={momentumData}
-              onOpenAIFoodLogger={() => setIsAIFoodLoggerOpen(true)}
-            />
-          )}
-
-          {/* TODAY TAB (UNIFIED DASHBOARD) */}
+      {/* Main Content Workspace */}
+      <div className="lg:pl-64 pb-20 lg:pb-8 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+          
+          {/* TODAY COMMAND CENTER (DEFAULT HERO VIEW) */}
           {activeTab === 'today' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="space-y-6 animate-fadeIn">
               
-              {/* Left Column: Transformation Score, Habits Grid & Check-In */}
-              <div className="lg:col-span-2 space-y-6">
+              {/* Hero Command Center Header */}
+              <HeroCommandCenter
+                userName={user?.displayName || 'YUGI'}
+                selectedDate={selectedDate}
+                transformationScore={transformationScore}
+                completedHabitsCount={completedHabitsCount}
+                totalCount={totalCount}
+                currentWorkouts={currentWorkouts}
+                currentDailyNutrition={currentDailyNutrition}
+                currentWaterLiters={currentWaterLiters}
+                nutritionTargets={nutritionTargets}
+                onOpenWorkoutLogger={() => setIsWorkoutLoggerOpen(true)}
+                onOpenNutritionTab={() => setActiveTab('nutrition')}
+              />
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                {/* Transformation Score Banner */}
-                <div className="card p-6 bg-gradient-to-br from-dark-800/95 via-dark-800/90 to-dark-700/80 border-accent-primary/30 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl">
-                  <div className="space-y-2 text-center sm:text-left">
-                    <span className="text-xs font-bold text-accent-primary uppercase tracking-widest">
-                      Transformation Score
-                    </span>
-                    <div className="flex items-baseline justify-center sm:justify-start gap-2">
-                      <span className="text-4xl sm:text-5xl font-black text-white">{transformationScore}</span>
-                      <span className="text-sm text-white/40">/ 100</span>
+                {/* Left Column: Objective Mission List & Daily Check-In */}
+                <div className="lg:col-span-2 space-y-6">
+                  
+                  {/* Objective Mission List */}
+                  <TodaysMission
+                    activeHabits={activeHabits}
+                    habitsCompletions={currentHabitCompletions}
+                    onToggleHabit={toggleHabit}
+                    selectedDate={selectedDate}
+                  />
+
+                  {/* Daily Check-In Widget (Morning Focus & Evening Reflection) */}
+                  <DailyCheckIn 
+                    selectedDate={selectedDate}
+                    dailyRecord={currentDailyRecord}
+                    onSaveMorningFocus={(focus) => saveMorningFocus(focus, selectedDate)}
+                    onSaveEveningReflection={(ref) => saveEveningReflection(ref, selectedDate)}
+                  />
+
+                  {/* Quick Water Logger Widget */}
+                  <WaterTrackerWidget
+                    selectedDate={selectedDate}
+                    currentWaterLiters={currentWaterLiters}
+                    targetWaterLiters={nutritionTargets.dailyWaterLiters || 4.0}
+                    onAddWaterDelta={addWaterDelta}
+                    onUpdateWaterLog={updateWaterLog}
+                  />
+
+                  {/* 14-Day Trend Chart */}
+                  <DailyChart habitList={activeHabits} days={14} />
+                </div>
+
+                {/* Right Column: Consistency Metrics & Philosophy */}
+                <div className="space-y-6">
+                  
+                  {/* Consistency Summary Stats */}
+                  <div className="card p-6 space-y-4">
+                    <h3 className="font-bold text-white text-xs uppercase tracking-wider">Consistency Metrics</h3>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-dark-900 border border-white/5">
+                        <span className="text-xs text-white/60 font-semibold">7-Day Consistency</span>
+                        <span className="text-lg font-black text-accent-primary">{weeklyConsistency}%</span>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-dark-900 border border-white/5">
+                        <span className="text-xs text-white/60 font-semibold">30-Day Consistency</span>
+                        <span className="text-lg font-black text-cyan-400">{monthlyConsistency}%</span>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-dark-900 border border-white/5">
+                        <span className="text-xs text-white/60 font-semibold">Total Active Days</span>
+                        <span className="text-lg font-black text-white">{streakStats.totalActiveDays} Days</span>
+                      </div>
                     </div>
-                    <p className="text-xs text-white/60">
-                      Unified daily performance score across habits, fitness, nutrition, and goals
+                  </div>
+
+                  {/* Motivational Philosophy Card */}
+                  <div className="card p-6 bg-gradient-to-br from-accent-primary/10 via-purple-500/10 to-cyan-500/10 border-accent-primary/20 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🔥</span>
+                      <h3 className="font-bold text-white text-xs uppercase tracking-wider">Momentum Principle</h3>
+                    </div>
+                    <p className="text-xs text-white/70 leading-relaxed italic">
+                      "Track habits, workouts, and nutrition daily to understand your performance and unlock your true potential."
                     </p>
                   </div>
 
-                  <div className="w-full sm:w-1/2 space-y-2">
-                    <ProgressBar 
-                      percentage={transformationScore}
-                      showPercentage={true}
-                      height={12}
-                      label=""
-                    />
-                    <div className="flex justify-between text-[11px] text-white/50 font-medium pt-1">
-                      <span>Habit Score: <strong className="text-accent-primary">{habitsScore}%</strong></span>
-                      <span>Streak: <strong className="text-orange-400 font-extrabold">{streakStats.currentStreak} Days 🔥</strong></span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Status Cards Grid (Unified Overview) */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                  {/* Habits Status */}
-                  <div className="p-3.5 rounded-xl card border-white/10 space-y-1">
-                    <span className="text-white/40 font-semibold block uppercase text-[10px]">Habits</span>
-                    <strong className="text-white text-sm block">{completedHabitsCount} / {totalCount}</strong>
-                    <span className="text-[10px] text-accent-primary font-bold">{habitsScore}% done</span>
-                  </div>
-
-                  {/* Workout Status */}
-                  <div 
-                    onClick={() => setIsWorkoutLoggerOpen(true)}
-                    className="p-3.5 rounded-xl card border-white/10 space-y-1 cursor-pointer hover:border-accent-primary/40 transition-all"
-                  >
-                    <span className="text-white/40 font-semibold block uppercase text-[10px]">Workout</span>
-                    <strong className="text-white text-sm block">
-                      {currentWorkouts.length > 0 ? `✓ ${currentWorkouts.length} Session` : '○ Not Logged'}
-                    </strong>
-                    <span className="text-[10px] text-accent-primary font-bold">+ Log Workout</span>
-                  </div>
-
-                  {/* Nutrition Status */}
-                  <div 
-                    onClick={() => setActiveTab('nutrition')}
-                    className="p-3.5 rounded-xl card border-white/10 space-y-1 cursor-pointer hover:border-accent-primary/40 transition-all"
-                  >
-                    <span className="text-white/40 font-semibold block uppercase text-[10px]">Calories & Protein</span>
-                    <strong className="text-white text-sm block">{currentDailyNutrition.totalCalories} kcal</strong>
-                    <span className="text-[10px] text-emerald-400 font-bold">{currentDailyNutrition.totalProtein}g protein</span>
-                  </div>
-
-                  {/* Water Status */}
-                  <div 
-                    onClick={() => setActiveTab('nutrition')}
-                    className="p-3.5 rounded-xl card border-white/10 space-y-1 cursor-pointer hover:border-accent-primary/40 transition-all"
-                  >
-                    <span className="text-white/40 font-semibold block uppercase text-[10px]">Hydration</span>
-                    <strong className="text-cyan-400 text-sm block">{currentWaterLiters.toFixed(1)} / {nutritionTargets.dailyWaterLiters || 4.0}L</strong>
-                    <span className="text-[10px] text-white/50">{macroStats.waterPct}% of goal</span>
-                  </div>
-                </div>
-
-                {/* Daily Habits Grid */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                        Today's Habits & Routine
-                      </h2>
-                      <p className="text-xs text-white/50">Complete habits for {selectedDate}</p>
-                    </div>
-
-                    <button
-                      onClick={() => setIsHabitManagerOpen(true)}
-                      className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-accent-primary text-xs font-bold border border-accent-primary/20 transition-all"
-                    >
-                      + Manage Habits
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {activeHabits.map((habit, index) => (
-                      <HabitCard
-                        key={habit.id}
-                        habit={habit}
-                        isCompleted={Boolean(currentHabitCompletions[habit.id])}
-                        onToggle={(id) => toggleHabit(id, selectedDate)}
-                        index={index}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Daily Check-In Widget (Morning Focus & Evening Reflection) */}
-                <DailyCheckIn 
-                  selectedDate={selectedDate}
-                  dailyRecord={currentDailyRecord}
-                  onSaveMorningFocus={(focus) => saveMorningFocus(focus, selectedDate)}
-                  onSaveEveningReflection={(ref) => saveEveningReflection(ref, selectedDate)}
-                />
-
-                {/* Quick Water Logger Widget */}
-                <WaterTrackerWidget
-                  selectedDate={selectedDate}
-                  currentWaterLiters={currentWaterLiters}
-                  targetWaterLiters={nutritionTargets.dailyWaterLiters || 4.0}
-                  onAddWaterDelta={addWaterDelta}
-                  onUpdateWaterLog={updateWaterLog}
-                />
-
-                {/* 14-Day Trend Chart */}
-                <DailyChart habitList={activeHabits} days={14} />
-              </div>
-
-              {/* Right Column: Transformation Ring, Top Goal & Metrics */}
-              <div className="space-y-6">
-                
-                {/* Progress Ring Card */}
-                <div className="card p-6 flex flex-col items-center shadow-xl">
-                  <ProgressRing 
-                    percentage={transformationScore}
-                    size={190}
-                    strokeWidth={14}
-                    label="Transform"
-                  />
-                  
-                  <div className="mt-5 text-center space-y-1">
-                    {transformationScore >= 90 ? (
-                      <p className="text-accent-primary font-bold text-sm">
-                        🎉 Champion Level! Peak discipline today!
-                      </p>
-                    ) : transformationScore >= 75 ? (
-                      <p className="text-emerald-300 font-semibold text-sm">
-                        Great momentum across habits & workout! 💪
-                      </p>
-                    ) : transformationScore >= 50 ? (
-                      <p className="text-amber-300 font-semibold text-sm">
-                        Solid progress! Complete remaining targets!
-                      </p>
-                    ) : (
-                      <p className="text-white/60 text-sm">
-                        Build your day step by step! 🚀
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Top Goal Progress Card */}
-                {topGoal && (
-                  <div className="card p-5 space-y-3 bg-gradient-to-br from-dark-800/90 to-dark-700/80 border-white/10">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-accent-primary uppercase tracking-wider">Top Priority Goal</span>
-                      <span className="text-xs text-white/50">{topGoal.category}</span>
-                    </div>
-
-                    <h3 className="font-bold text-white text-sm">{topGoal.title}</h3>
-
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-medium">
-                        <span className="text-white/60">Target Progress</span>
-                        <span className="text-accent-primary font-bold">{topGoal.targetValue} {topGoal.unit || 'days'}</span>
-                      </div>
-                      <ProgressBar 
-                        percentage={topGoal.completed ? 100 : 50} 
-                        showPercentage={false} 
-                        height={8} 
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Consistency Summary Stats */}
-                <div className="card p-5 space-y-4">
-                  <h3 className="font-bold text-white text-sm uppercase tracking-wider">Consistency Metrics</h3>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-dark-900/60 border border-white/5">
-                      <span className="text-xs text-white/60">7-Day Consistency</span>
-                      <span className="text-base font-extrabold text-accent-primary">{weeklyConsistency}%</span>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-dark-900/60 border border-white/5">
-                      <span className="text-xs text-white/60">30-Day Consistency</span>
-                      <span className="text-base font-extrabold text-cyan-400">{monthlyConsistency}%</span>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-dark-900/60 border border-white/5">
-                      <span className="text-xs text-white/60">Total Active Days</span>
-                      <span className="text-base font-extrabold text-white">{streakStats.totalActiveDays} Days</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Motivational Accountability Card */}
-                <div className="card p-5 bg-gradient-to-br from-accent-primary/10 via-purple-500/10 to-cyan-500/10 border-accent-primary/20 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">🔥</span>
-                    <h3 className="font-bold text-white text-sm">Personal Growth Philosophy</h3>
-                  </div>
-                  <p className="text-xs text-white/70 leading-relaxed">
-                    "Track habits, workouts, and nutrition daily to understand your habits and unlock your true potential."
-                  </p>
                 </div>
 
               </div>
+
+            </div>
+          )}
+
+          {/* AI COACH TAB */}
+          {activeTab === 'coach' && (
+            <div className="animate-fadeIn">
+              <AICoachDashboard
+                selectedDate={selectedDate}
+                fullAppData={momentumData}
+                onOpenAIFoodLogger={() => setIsAIFoodLoggerOpen(true)}
+              />
             </div>
           )}
 
           {/* FITNESS & WORKOUTS TAB */}
           {activeTab === 'fitness' && (
-            <WorkoutHistoryView 
-              workoutsMap={workoutsMap}
-              personalRecords={personalRecords}
-              exerciseDatabase={exerciseDatabase}
-              onOpenLogger={() => setIsWorkoutLoggerOpen(true)}
-              onDeleteWorkout={deleteWorkout}
-            />
+            <div className="animate-fadeIn">
+              <WorkoutHistoryView 
+                workoutsMap={workoutsMap}
+                personalRecords={personalRecords}
+                exerciseDatabase={exerciseDatabase}
+                onOpenLogger={() => setIsWorkoutLoggerOpen(true)}
+                onDeleteWorkout={deleteWorkout}
+              />
+            </div>
           )}
 
           {/* NUTRITION & WATER TAB */}
           {activeTab === 'nutrition' && (
-            <NutritionTrackerView 
-              selectedDate={selectedDate}
-              foodEntriesMap={foodEntriesMap}
-              waterLogsMap={waterLogsMap}
-              nutritionTargets={nutritionTargets}
-              currentDailyNutrition={currentDailyNutrition}
-              macroStats={macroStats}
-              onSaveFoodEntry={saveFoodEntry}
-              onDeleteFoodEntry={deleteFoodEntry}
-              onUpdateWaterLog={updateWaterLog}
-              onAddWaterDelta={addWaterDelta}
-              onUpdateNutritionTargets={updateNutritionTargets}
-            />
+            <div className="animate-fadeIn">
+              <NutritionTrackerView 
+                selectedDate={selectedDate}
+                foodEntriesMap={foodEntriesMap}
+                waterLogsMap={waterLogsMap}
+                nutritionTargets={nutritionTargets}
+                currentDailyNutrition={currentDailyNutrition}
+                macroStats={macroStats}
+                onSaveFoodEntry={saveFoodEntry}
+                onDeleteFoodEntry={deleteFoodEntry}
+                onUpdateWaterLog={updateWaterLog}
+                onAddWaterDelta={addWaterDelta}
+                onUpdateNutritionTargets={updateNutritionTargets}
+              />
+            </div>
           )}
 
           {/* BODY MEASUREMENTS TAB */}
           {activeTab === 'body' && (
-            <BodyMeasurementsView 
-              selectedDate={selectedDate}
-              bodyMeasurementsMap={bodyMeasurementsMap}
-              weightGoal={weightGoal}
-              onSaveBodyMeasurement={saveBodyMeasurement}
-              onUpdateWeightGoal={updateWeightGoal}
-            />
+            <div className="animate-fadeIn">
+              <BodyMeasurementsView 
+                selectedDate={selectedDate}
+                bodyMeasurementsMap={bodyMeasurementsMap}
+                weightGoal={weightGoal}
+                onSaveBodyMeasurement={saveBodyMeasurement}
+                onUpdateWeightGoal={updateWeightGoal}
+              />
+            </div>
           )}
 
-          {/* WEEKLY & MONTHLY ANALYTICS REVIEWS TAB */}
+          {/* REVIEWS TAB */}
           {activeTab === 'analytics' && (
-            <WeeklyMonthlyAnalytics 
-              dailyRecords={dailyRecords}
-              workoutsMap={workoutsMap}
-              foodEntriesMap={foodEntriesMap}
-              waterLogsMap={waterLogsMap}
-              activeHabits={activeHabits}
-            />
+            <div className="animate-fadeIn">
+              <WeeklyMonthlyAnalytics 
+                dailyRecords={dailyRecords}
+                workoutsMap={workoutsMap}
+                foodEntriesMap={foodEntriesMap}
+                waterLogsMap={waterLogsMap}
+                activeHabits={activeHabits}
+              />
+            </div>
           )}
 
-          {/* HABITS MANAGER TAB */}
+          {/* HABITS TAB */}
           {activeTab === 'habits' && (
-            <div className="card p-6 space-y-6">
+            <div className="card p-6 space-y-6 animate-fadeIn">
               <div className="flex items-center justify-between border-b border-white/10 pb-4">
                 <div>
                   <h2 className="text-xl font-bold text-white">⚙️ Habit Management System</h2>
@@ -524,7 +348,7 @@ function AppContent() {
                 </div>
                 <button
                   onClick={() => setIsHabitManagerOpen(true)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-accent-primary text-dark-900 shadow-glow"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-accent-primary text-dark-950 shadow-glow font-bold"
                 >
                   + Add Custom Habit
                 </button>
@@ -535,7 +359,7 @@ function AppContent() {
                   <div 
                     key={habit.id}
                     className={`p-4 rounded-xl border flex items-center justify-between ${
-                      habit.active !== false ? 'bg-dark-800/80 border-white/10' : 'bg-dark-900/40 border-white/5 opacity-50'
+                      habit.active !== false ? 'bg-dark-900 border-white/10' : 'bg-dark-900/40 border-white/5 opacity-50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -543,7 +367,7 @@ function AppContent() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-bold text-white text-sm">{habit.name}</h4>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/70">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/70 font-semibold">
                             {habit.category || 'Personal'}
                           </span>
                         </div>
@@ -575,10 +399,9 @@ function AppContent() {
             </div>
           )}
 
-          {/* CALENDAR & HEATMAP TAB */}
+          {/* CALENDAR TAB */}
           {activeTab === 'calendar' && (
-            <div className="space-y-6">
-              
+            <div className="space-y-6 animate-fadeIn">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <MonthGrid 
                   year={currentYear}
@@ -596,95 +419,72 @@ function AppContent() {
                   onSelectDate={(d) => setInspectingDate(d)}
                 />
               </div>
-
-              {/* All Months Grid Overview */}
-              <div className="space-y-4">
-                <h3 className="font-bold text-white text-lg">Annual Calendar Overview</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <MonthGrid
-                      key={i}
-                      year={currentYear}
-                      month={i}
-                      dailyRecords={dailyRecords}
-                      activeHabits={activeHabits}
-                      isCurrentMonth={i === currentMonth}
-                      onSelectDate={(d) => setInspectingDate(d)}
-                    />
-                  ))}
-                </div>
-              </div>
             </div>
           )}
 
           {/* GOALS TAB */}
           {activeTab === 'goals' && (
-            <GoalsPanel 
-              goals={goals}
-              habitsList={activeHabits}
-              dailyRecords={dailyRecords}
-              workoutsMap={workoutsMap}
-              foodEntriesMap={foodEntriesMap}
-              onAddGoal={addGoal}
-              onToggleGoal={toggleGoal}
-              onDeleteGoal={deleteGoal}
-            />
+            <div className="animate-fadeIn">
+              <GoalsPanel 
+                goals={goals}
+                habitsList={activeHabits}
+                dailyRecords={dailyRecords}
+                workoutsMap={workoutsMap}
+                foodEntriesMap={foodEntriesMap}
+                onAddGoal={addGoal}
+                onToggleGoal={toggleGoal}
+                onDeleteGoal={deleteGoal}
+              />
+            </div>
           )}
 
         </div>
-
-        {/* Modals */}
-        <WorkoutLoggerModal 
-          dateStr={selectedDate}
-          exerciseDatabase={exerciseDatabase}
-          isOpen={isWorkoutLoggerOpen}
-          onClose={() => setIsWorkoutLoggerOpen(false)}
-          onSaveWorkout={saveWorkout}
-          onAddCustomExercise={addCustomExercise}
-        />
-
-        <HabitManagerModal 
-          habitsList={habitsList}
-          isOpen={isHabitManagerOpen}
-          onClose={() => setIsHabitManagerOpen(false)}
-          onAddHabit={addHabit}
-          onUpdateHabit={updateHabit}
-          onToggleActive={toggleHabitActive}
-          onDeleteHabit={deleteHabit}
-        />
-
-        <AIFoodLoggerModal
-          selectedDate={selectedDate}
-          fullAppData={momentumData}
-          isOpen={isAIFoodLoggerOpen}
-          onClose={() => setIsAIFoodLoggerOpen(false)}
-          onSaveFoodEntry={saveFoodEntry}
-        />
-
-        <DayDetailModal 
-          dateStr={inspectingDate}
-          dailyRecord={dailyRecords[inspectingDate]}
-          workoutsMap={workoutsMap}
-          foodEntriesMap={foodEntriesMap}
-          waterLogsMap={waterLogsMap}
-          bodyMeasurementsMap={bodyMeasurementsMap}
-          habitsList={habitsList}
-          isOpen={Boolean(inspectingDate)}
-          onClose={() => setInspectingDate(null)}
-          onToggleHabit={toggleHabit}
-        />
-
-        {/* Footer */}
-        <footer className="mt-12 pt-6 border-t border-white/5 text-center">
-          <p className="text-xs text-white/40">
-            MOMENTUM — Personal Transformation System • Phase 3: COACH ME
-          </p>
-          <p className="text-xs text-accent-primary font-bold mt-2">
-            BUILT BY YUGI
-          </p>
-        </footer>
-
       </div>
+
+      {/* Mobile Glass Navigation */}
+      <MobileNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+      {/* Modals */}
+      <WorkoutLoggerModal 
+        dateStr={selectedDate}
+        exerciseDatabase={exerciseDatabase}
+        isOpen={isWorkoutLoggerOpen}
+        onClose={() => setIsWorkoutLoggerOpen(false)}
+        onSaveWorkout={saveWorkout}
+        onAddCustomExercise={addCustomExercise}
+      />
+
+      <HabitManagerModal 
+        habitsList={habitsList}
+        isOpen={isHabitManagerOpen}
+        onClose={() => setIsHabitManagerOpen(false)}
+        onAddHabit={addHabit}
+        onUpdateHabit={updateHabit}
+        onToggleActive={toggleHabitActive}
+        onDeleteHabit={deleteHabit}
+      />
+
+      <AIFoodLoggerModal
+        selectedDate={selectedDate}
+        fullAppData={momentumData}
+        isOpen={isAIFoodLoggerOpen}
+        onClose={() => setIsAIFoodLoggerOpen(false)}
+        onSaveFoodEntry={saveFoodEntry}
+      />
+
+      <DayDetailModal 
+        dateStr={inspectingDate}
+        dailyRecord={dailyRecords[inspectingDate]}
+        workoutsMap={workoutsMap}
+        foodEntriesMap={foodEntriesMap}
+        waterLogsMap={waterLogsMap}
+        bodyMeasurementsMap={bodyMeasurementsMap}
+        habitsList={habitsList}
+        isOpen={Boolean(inspectingDate)}
+        onClose={() => setInspectingDate(null)}
+        onToggleHabit={toggleHabit}
+      />
+
     </div>
   );
 }
