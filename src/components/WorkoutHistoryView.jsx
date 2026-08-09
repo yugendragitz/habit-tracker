@@ -54,7 +54,7 @@ export default function WorkoutHistoryView({ workoutsMap, personalRecords, exerc
         </div>
         <button
           onClick={onOpenLogger}
-          className="px-5 py-2.5 rounded-xl text-xs font-bold bg-accent-primary text-dark-900 shadow-glow hover:brightness-110 transition-all"
+          className="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-glow hover:brightness-110 transition-all"
         >
           + Log Today's Workout
         </button>

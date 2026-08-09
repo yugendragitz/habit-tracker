@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, memo, useCallback } from 'react';
 import { useMotion } from '../context/MotionContext';
 
 /**
- * ProgressRing Component
- * Uses motion system for smooth value interpolation
+ * ProgressRing Component - Cosmic Radial Momentum Ring Visual
  */
 const ProgressRing = memo(({ 
   percentage, 
@@ -85,13 +84,11 @@ const ProgressRing = memo(({
           delay: 0.2,
           onComplete: () => {
             hasEnteredRef.current = true;
-            // Animate to initial percentage after entrance
             animateProgress(percentage);
           }
         }
       );
     } else if (hasEnteredRef.current) {
-      // Animate subsequent changes
       animateProgress(percentage);
     }
   }, [percentage, gsap, DURATION, EASING, animateProgress]);
@@ -114,21 +111,22 @@ const ProgressRing = memo(({
           cy={center}
           r={radius}
           fill="none"
-          stroke="rgba(255, 255, 255, 0.1)"
+          stroke="rgba(255, 255, 255, 0.08)"
           strokeWidth={strokeWidth}
         />
         
-        {/* Gradient definition */}
+        {/* Deep Cosmic Multi-Gradient definition */}
         <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00ffc8" />
-            <stop offset="50%" stopColor="#00d4aa" />
-            <stop offset="100%" stopColor="#22d3ee" />
+          <linearGradient id="cosmicProgressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#a855f7" />
+            <stop offset="35%" stopColor="#3b82f6" />
+            <stop offset="70%" stopColor="#06b6d4" />
+            <stop offset="100%" stopColor="#ec4899" />
           </linearGradient>
           
-          {/* Glow filter */}
-          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+          {/* Soft Glow filter */}
+          <filter id="cosmicGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
               <feMergeNode in="SourceGraphic" />
@@ -143,30 +141,30 @@ const ProgressRing = memo(({
           cy={center}
           r={radius}
           fill="none"
-          stroke="url(#progressGradient)"
+          stroke="url(#cosmicProgressGradient)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={circumference}
-          filter="url(#glow)"
+          filter="url(#cosmicGlow)"
         />
       </svg>
       
       {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl sm:text-5xl font-bold gradient-text">
-          {displayPercentage}%
+        <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400">
+          {displayPercentage}
         </span>
         {showLabel && (
-          <span className="text-sm text-white/50 mt-1">{label}</span>
+          <span className="text-xs font-bold tracking-widest text-white/50 uppercase mt-0.5">{label}</span>
         )}
       </div>
 
-      {/* Glow effect behind ring */}
+      {/* Atmospheric Glow effect behind ring */}
       <div 
-        className="absolute inset-0 rounded-full opacity-30 blur-xl pointer-events-none"
+        className="absolute inset-0 rounded-full opacity-20 blur-xl pointer-events-none"
         style={{
-          background: `conic-gradient(from 0deg, transparent ${100 - displayPercentage}%, rgba(0, 255, 200, 0.3) ${100 - displayPercentage}%)`,
+          background: `conic-gradient(from 0deg, transparent ${100 - displayPercentage}%, rgba(168, 85, 247, 0.4) ${100 - displayPercentage}%)`,
         }}
       />
     </div>

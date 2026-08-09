@@ -171,7 +171,7 @@ export default function AICoachDashboard({ selectedDate, fullAppData, onOpenAIFo
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-dark-900 border border-white/5">
                   <span className="text-white/60">Protein Target</span>
-                  <span className="font-bold text-emerald-400">{targets.dailyProteinGrams}g</span>
+                  <span className="font-bold text-purple-400">{targets.dailyProteinGrams}g</span>
                 </div>
                 <div className="flex justify-between p-2.5 rounded-xl bg-dark-900 border border-white/5">
                   <span className="text-white/60">Water Intake Target</span>
@@ -204,8 +204,8 @@ export default function AICoachDashboard({ selectedDate, fullAppData, onOpenAIFo
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 space-y-2">
-              <h4 className="font-bold text-emerald-400 text-sm flex items-center gap-2">
+            <div className="p-4 rounded-xl bg-purple-950/20 border border-purple-500/30 space-y-2">
+              <h4 className="font-bold text-purple-400 text-sm flex items-center gap-2">
                 <span>✓</span>
                 <span>WHAT WENT WELL TODAY</span>
               </h4>

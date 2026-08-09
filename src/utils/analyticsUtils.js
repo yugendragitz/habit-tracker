@@ -143,12 +143,12 @@ export const getHeatmapLevel = (score) => {
 };
 
 export const HEATMAP_COLORS = {
-  0: 'bg-white/5 border-white/5',
-  1: 'bg-emerald-950/60 border-emerald-800/40 text-emerald-300',
-  2: 'bg-emerald-800/60 border-emerald-600/40 text-emerald-200',
-  3: 'bg-emerald-600/70 border-emerald-500/50 text-emerald-100',
-  4: 'bg-accent-primary/80 border-accent-primary/60 text-dark-900 font-bold',
-  5: 'bg-accent-primary border-accent-primary text-dark-900 shadow-glow font-bold',
+  0: 'bg-[#0B1020] border-white/5',
+  1: 'bg-[#172A5A] border-blue-500/20 text-blue-200',
+  2: 'bg-[#3B2A8F] border-purple-500/30 text-purple-200',
+  3: 'bg-[#7A35C9] border-purple-400/40 text-white font-semibold',
+  4: 'bg-[#C94CFF] border-pink-400/50 text-white shadow-glow-magenta font-bold',
+  5: 'bg-[#5DEBFF] border-cyan-300 text-dark-900 shadow-glow-cyan font-black',
 };
 
 // Backward compatibility alias

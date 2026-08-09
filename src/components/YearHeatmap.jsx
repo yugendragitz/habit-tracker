@@ -83,7 +83,7 @@ const YearHeatmap = memo(({ year, dailyRecords = {}, activeHabits = [], onSelect
     <div className="card p-4 sm:p-6 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-white flex items-center gap-2">
-          🟩 {year} Consistency Heatmap
+          🌌 {year} Transformation Heatmap
         </h3>
         <span className="text-xs text-white/50">GitHub-style Daily Score Heatmap</span>
       </div>

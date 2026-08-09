@@ -4,15 +4,18 @@
 
 @layer base {
   :root {
-    --bg-dark-950: #08090d;
-    --bg-surface-card: #11141f;
-    --bg-surface-elevated: #171b29;
+    --bg-dark-950: #05060b;
+    --bg-surface-card: #0d0f19;
+    --bg-surface-elevated: #141827;
     --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-focus: rgba(0, 255, 200, 0.35);
-    --color-accent: #00ffc8;
-    --color-cyan: #22d3ee;
-    --color-emerald: #34d399;
-    --color-amber: #fbbf24;
+    --border-focus: rgba(168, 85, 247, 0.4);
+    
+    /* Cosmic Performance Accents */
+    --color-accent-violet: #a855f7;
+    --color-accent-blue: #3b82f6;
+    --color-accent-cyan: #06b6d4;
+    --color-accent-magenta: #ec4899;
+    --color-accent-orange: #f97316;
   }
 
   body {
@@ -25,23 +28,23 @@
   }
 }
 
-/* Glassmorphism & Custom Surfaces */
+/* Glassmorphism & Custom Cosmic Surfaces */
 .glass-panel {
-  background: rgba(17, 20, 31, 0.75);
+  background: rgba(13, 15, 25, 0.75);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
 }
 
 .glass-panel-elevated {
-  background: rgba(23, 27, 41, 0.85);
+  background: rgba(20, 24, 39, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .glass-nav {
-  background: rgba(13, 15, 23, 0.85);
+  background: rgba(8, 10, 18, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border-subtle);
@@ -70,20 +73,24 @@
 .card-interactive:hover {
   border-color: var(--border-focus);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 255, 200, 0.08);
+  box-shadow: 0 10px 25px -5px rgba(168, 85, 247, 0.15);
 }
 
 /* Shadow Glow Effects */
 .shadow-glow {
-  box-shadow: 0 0 20px -3px rgba(0, 255, 200, 0.25);
+  box-shadow: 0 0 20px -3px rgba(168, 85, 247, 0.3);
 }
 
 .shadow-glow-cyan {
-  box-shadow: 0 0 20px -3px rgba(34, 211, 238, 0.25);
+  box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.3);
 }
 
-.shadow-glow-amber {
-  box-shadow: 0 0 20px -3px rgba(251, 191, 36, 0.25);
+.shadow-glow-magenta {
+  box-shadow: 0 0 20px -3px rgba(236, 72, 153, 0.3);
+}
+
+.shadow-glow-orange {
+  box-shadow: 0 0 20px -3px rgba(249, 115, 22, 0.3);
 }
 
 /* Custom Scrollbar */
@@ -93,7 +100,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(8, 9, 13, 0.8);
+  background: rgba(5, 6, 11, 0.9);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -102,10 +109,10 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 255, 200, 0.4);
+  background: rgba(168, 85, 247, 0.5);
 }
 
-/* Stagger & Micro Animations */
+/* Keyframes */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -117,13 +124,13 @@
   }
 }
 
-@keyframes pulseGlow {
+@keyframes cosmicPulse {
   0%, 100% {
-    opacity: 0.8;
+    opacity: 0.7;
   }
   50% {
     opacity: 1;
-    filter: drop-shadow(0 0 8px rgba(0, 255, 200, 0.6));
+    filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.6));
   }
 }
 
@@ -131,6 +138,6 @@
   animation: fadeIn 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-pulseGlow {
-  animation: pulseGlow 2s ease-in-out infinite;
+.animate-cosmicPulse {
+  animation: cosmicPulse 2.5s ease-in-out infinite;
 }

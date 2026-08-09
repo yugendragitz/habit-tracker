@@ -92,7 +92,7 @@ export default function NutritionTrackerView({
           </button>
           <button
             onClick={() => setShowAddMealModal(true)}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-accent-primary text-dark-900 shadow-glow hover:brightness-110 transition-all"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-500 to-cyan-500 text-white shadow-glow hover:brightness-110 transition-all"
           >
             + Add Food / Meal
           </button>
@@ -106,7 +106,7 @@ export default function NutritionTrackerView({
         <div className="card p-5 space-y-3">
           <div className="flex justify-between items-center text-xs">
             <span className="text-white/60 font-semibold uppercase">Calories</span>
-            <span className="text-accent-primary font-bold">{currentDailyNutrition.totalCalories} / {nutritionTargets.dailyCalories || 3000} kcal</span>
+            <span className="text-purple-400 font-bold">{currentDailyNutrition.totalCalories} / {nutritionTargets.dailyCalories || 3000} kcal</span>
           </div>
           <ProgressBar percentage={macroStats.caloriePct} showPercentage={false} height={8} />
           <div className="flex justify-between text-[11px] text-white/40 pt-1">
@@ -119,10 +119,10 @@ export default function NutritionTrackerView({
         <div className="card p-5 space-y-3">
           <div className="flex justify-between items-center text-xs">
             <span className="text-white/60 font-semibold uppercase">Protein</span>
-            <span className="text-emerald-400 font-bold">{currentDailyNutrition.totalProtein} / {nutritionTargets.dailyProteinGrams || 140}g</span>
+            <span className="text-purple-400 font-bold">{currentDailyNutrition.totalProtein} / {nutritionTargets.dailyProteinGrams || 130}g</span>
           </div>
           <div className="w-full h-2 rounded-full bg-dark-900 overflow-hidden border border-white/5">
-            <div className="h-full bg-emerald-400 rounded-full transition-all duration-500" style={{ width: `${macroStats.proteinPct}%` }} />
+            <div className="h-full bg-purple-400 rounded-full transition-all duration-500" style={{ width: `${macroStats.proteinPct}%` }} />
           </div>
           <div className="flex justify-between text-[11px] text-white/40 pt-1">
             <span>Progress: {macroStats.proteinPct}%</span>
