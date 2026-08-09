@@ -35,6 +35,17 @@ export const useMomentumData = (userId = null) => {
     let isMounted = true;
     const syncData = async () => {
       const localData = getMomentumData();
+      
+      // Helper to strip stale test dates (Jan 27-29)
+      const cleanRecords = (recs = {}) => {
+        const cleaned = {};
+        Object.entries(recs).forEach(([k, v]) => {
+          if (k.startsWith('2026-01-27') || k.startsWith('2026-01-28') || k.startsWith('2026-01-29')) return;
+          cleaned[k] = v;
+        });
+        return cleaned;
+      };
+
       if (userId) {
         const cloudData = await loadMomentumFromCloud(userId);
         if (cloudData && isMounted) {
@@ -43,7 +54,7 @@ export const useMomentumData = (userId = null) => {
             ...cloudData,
             habits: cloudData.habits && cloudData.habits.length > 0 ? cloudData.habits : localData.habits,
             exerciseDatabase: cloudData.exerciseDatabase && cloudData.exerciseDatabase.length > 0 ? cloudData.exerciseDatabase : localData.exerciseDatabase,
-            dailyRecords: { ...localData.dailyRecords, ...(cloudData.dailyRecords || {}) },
+            dailyRecords: cleanRecords({ ...localData.dailyRecords, ...(cloudData.dailyRecords || {}) }),
             workouts: { ...localData.workouts, ...(cloudData.workouts || {}) },
             foodEntries: { ...localData.foodEntries, ...(cloudData.foodEntries || {}) },
             waterLogs: { ...localData.waterLogs, ...(cloudData.waterLogs || {}) },
@@ -59,7 +70,9 @@ export const useMomentumData = (userId = null) => {
         }
       }
       if (isMounted) {
-        setData(localData);
+        const cleanedLocal = { ...localData, dailyRecords: cleanRecords(localData.dailyRecords || {}) };
+        setData(cleanedLocal);
+        saveMomentumData(cleanedLocal);
         setIsLoaded(true);
       }
     };

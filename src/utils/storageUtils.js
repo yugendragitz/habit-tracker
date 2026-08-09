@@ -53,6 +53,19 @@ const createInitialData = () => ({
   personalRecords: {},
 });
 
+// Clean helper to purge legacy test data (e.g., January 2026 test records)
+const sanitizeRecords = (recordsMap = {}) => {
+  const cleaned = {};
+  Object.entries(recordsMap).forEach(([dateStr, val]) => {
+    // Strip test records from January 2026 before official deployment
+    if (dateStr.startsWith('2026-01-27') || dateStr.startsWith('2026-01-28') || dateStr.startsWith('2026-01-29')) {
+      return; // Skip test records
+    }
+    cleaned[dateStr] = val;
+  });
+  return cleaned;
+};
+
 // Load all MOMENTUM data with automatic multi-version migration
 export const getMomentumData = () => {
   try {
@@ -76,6 +89,9 @@ export const getMomentumData = () => {
       if (!parsed.waterLogs) parsed.waterLogs = {};
       if (!parsed.bodyMeasurements) parsed.bodyMeasurements = {};
       if (!parsed.goals) parsed.goals = [];
+      
+      // Sanitize daily records to purge legacy test data
+      parsed.dailyRecords = sanitizeRecords(parsed.dailyRecords || {});
       return parsed;
     }
 
@@ -86,26 +102,13 @@ export const getMomentumData = () => {
     if (v1Raw) {
       const v1Data = JSON.parse(v1Raw);
       initialData.habits = v1Data.habits || DEFAULT_HABITS;
-      initialData.dailyRecords = v1Data.dailyRecords || {};
+      initialData.dailyRecords = sanitizeRecords(v1Data.dailyRecords || {});
       initialData.goals = v1Data.goals || initialData.goals;
       saveMomentumData(initialData);
       return initialData;
     }
 
-    // Try original legacy migration
-    const origRaw = localStorage.getItem(LEGACY_STORAGE_KEY_ORIGINAL);
-    if (origRaw) {
-      const origData = JSON.parse(origRaw);
-      Object.entries(origData).forEach(([dateStr, habitsMap]) => {
-        initialData.dailyRecords[dateStr] = {
-          habits: habitsMap,
-          score: calculateHabitScore(habitsMap, DEFAULT_HABITS),
-          updatedAt: new Date().toISOString()
-        };
-      });
-      saveMomentumData(initialData);
-    }
-
+    saveMomentumData(initialData);
     return initialData;
   } catch (error) {
     console.error('Error reading momentum data:', error);
