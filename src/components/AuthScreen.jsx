@@ -255,21 +255,6 @@ const AuthScreen = memo(() => {
                 </button>
               </div>
 
-              {/* Secondary Option: Guest Mode */}
-              <div className="pt-5 border-t border-white/10 mt-6 text-center space-y-2">
-                <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider block">
-                  or continue without an account
-                </span>
-                <button
-                  type="button"
-                  onClick={handleGuestAccess}
-                  className="w-full py-2.5 rounded-xl text-xs font-bold bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 transition-all"
-                >
-                  CONTINUE AS GUEST
-                </button>
-                <p className="text-[10px] text-white/30">Your data stays on this device.</p>
-              </div>
-
             </div>
 
           </div>
