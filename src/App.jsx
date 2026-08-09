@@ -8,6 +8,7 @@ import MobileNav from './components/MobileNav';
 import HeroCommandCenter from './components/HeroCommandCenter';
 import TodaysMission from './components/TodaysMission';
 import AnimatedBackground from './components/AnimatedBackground';
+import TopHeaderBar from './components/TopHeaderBar';
 
 // Existing Components
 import MonthGrid from './components/MonthGrid';
@@ -173,6 +174,14 @@ function AppContent() {
       <div className="lg:pl-64 pb-20 lg:pb-8 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
           
+          {/* Top Header Bar with prominent Log In / Log Out Option */}
+          <TopHeaderBar
+            userName={user?.displayName || user?.email?.split('@')[0]}
+            selectedDate={selectedDate}
+            onSelectDate={setSelectedDate}
+            currentStreak={streakStats.currentStreak}
+          />
+
           {/* TODAY COMMAND CENTER (DEFAULT HERO VIEW) */}
           {activeTab === 'today' && (
             <div className="space-y-6 animate-fadeIn">
