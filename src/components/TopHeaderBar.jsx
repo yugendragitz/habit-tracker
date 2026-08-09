@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import MomentumMark from './MomentumMark';
 
 export default function TopHeaderBar({ userName, selectedDate, onSelectDate, currentStreak }) {
   const { user, logout } = useAuth();
@@ -17,9 +18,7 @@ export default function TopHeaderBar({ userName, selectedDate, onSelectDate, cur
       {/* Left: Brand & Date Navigator */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-dark-900 font-black text-sm shadow-glow">
-            ⚡
-          </div>
+          <MomentumMark size={28} />
           <div>
             <h1 className="font-extrabold text-white text-sm tracking-wider uppercase leading-none">MOMENTUM</h1>
             <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest block mt-0.5">PERFORMANCE OS</span>

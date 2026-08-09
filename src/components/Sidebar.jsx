@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import MomentumMark from './MomentumMark';
 
 export default function Sidebar({ activeTab, onTabChange, userName, currentStreak, onLogout }) {
   const navItems = [
@@ -22,9 +22,7 @@ export default function Sidebar({ activeTab, onTabChange, userName, currentStrea
         {/* Brand Header */}
         <div className="px-3 pt-2 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-dark-900 font-black text-sm shadow-glow">
-              ⚡
-            </div>
+            <MomentumMark size={30} />
             <div>
               <h1 className="font-extrabold text-white text-base tracking-wider uppercase leading-none">MOMENTUM</h1>
               <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest block mt-0.5">PERFORMANCE OS</span>

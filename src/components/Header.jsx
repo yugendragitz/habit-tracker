@@ -2,6 +2,7 @@ import { useEffect, useRef, memo } from 'react';
 import { useMotion } from '../context/MotionContext';
 import { getDisplayDate, getToday } from '../utils/dateUtils';
 import { getDailyQuote } from '../utils/habits';
+import MomentumMark from './MomentumMark';
 
 const Header = memo(({ userName, selectedDate, onSelectDate, currentStreak, onOpenHabitManager }) => {
   const { gsap, DURATION, EASING } = useMotion();
@@ -56,9 +57,7 @@ const Header = memo(({ userName, selectedDate, onSelectDate, currentStreak, onOp
         {/* Top bar: System title + Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent-primary to-cyan-400 flex items-center justify-center text-dark-900 font-extrabold text-lg shadow-glow">
-              ⚡
-            </div>
+            <MomentumMark size={32} />
             <div>
               <span className="text-[10px] font-bold tracking-widest text-accent-primary uppercase">
                 Personal Transformation System
