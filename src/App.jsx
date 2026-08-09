@@ -19,6 +19,7 @@ import HabitManagerModal from './components/HabitManagerModal';
 import DailyCheckIn from './components/DailyCheckIn';
 import DayDetailModal from './components/DayDetailModal';
 import GoalsPanel from './components/GoalsPanel';
+import CalendarView from './components/CalendarView';
 
 // Phase 2 Components
 import WorkoutLoggerModal from './components/WorkoutLoggerModal';
@@ -410,24 +411,18 @@ function AppContent() {
 
           {/* CALENDAR TAB */}
           {activeTab === 'calendar' && (
-            <div className="space-y-6 animate-fadeIn">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <MonthGrid 
-                  year={currentYear}
-                  month={currentMonth}
-                  dailyRecords={dailyRecords}
-                  activeHabits={activeHabits}
-                  isCurrentMonth={true}
-                  onSelectDate={(d) => setInspectingDate(d)}
-                />
-
-                <YearHeatmap 
-                  year={currentYear} 
-                  dailyRecords={dailyRecords}
-                  activeHabits={activeHabits}
-                  onSelectDate={(d) => setInspectingDate(d)}
-                />
-              </div>
+            <div className="animate-fadeIn">
+              <CalendarView
+                selectedDate={selectedDate}
+                onSelectDate={setSelectedDate}
+                dailyRecordsMap={dailyRecords}
+                workoutsMap={workoutsMap}
+                foodEntriesMap={foodEntriesMap}
+                waterLogsMap={waterLogsMap}
+                activeHabits={activeHabits}
+                personalRecords={personalRecords}
+                nutritionTargets={nutritionTargets}
+              />
             </div>
           )}
 
